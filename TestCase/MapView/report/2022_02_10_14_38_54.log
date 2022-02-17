@@ -1,0 +1,13 @@
+[2022-02-10 14:38:57,259] - INFO: Start test Map View functions ... 
+[2022-02-10 14:39:07,283] - INFO: 打开地图页面
+[2022-02-10 14:39:18,735] - INFO: 开始搜索机器
+[2022-02-10 14:39:26,005] - INFO: 搜索到第一台机器： Josh's Truck - CalAmp
+[2022-02-10 14:39:26,006] - INFO: 搜索机器成功
+[2022-02-10 14:39:37,504] - INFO: 编辑机器成功
+[2022-02-10 14:40:07,977] - INFO: 编辑Jobsite成功
+[2022-02-10 14:40:44,878] - INFO: 发送Jobsite位置邮件成功
+[2022-02-10 14:41:14,920] - INFO: 已清空导入的Shape文件
+[2022-02-10 14:41:15,931] - INFO: 导入Shape文件
+[2022-02-10 14:42:12,304] - INFO: Import successfully
+[2022-02-10 14:42:50,996] - INFO: Test Route Navigation
+[2022-02-10 14:43:46,486] - INFO: Route Navigation Test Successfully!
