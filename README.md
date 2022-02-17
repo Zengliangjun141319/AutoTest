@@ -6,6 +6,6 @@ Python + Selenium + Unittest + HTMLTestRunner
 
 1. The project is hierarchical, including Common (common library), TestCase (test case), TestData (test data), Page (page element) and run (running script);
     
-2. The project needs to install the following packages: DDT, Selenium, Pymssql, bs4, xlrd
+2. The project needs to install the following packages: DDT, Selenium, Pymssql, bs4, xlrd==1.2.0
 
 3. The project framework is Python Unittest + Selenium + HTMLTestRunner 
