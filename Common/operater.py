@@ -7,11 +7,22 @@ from selenium.webdriver.support.select import Select
 from selenium.common.exceptions import *   # 导入所有的异常类
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver import Remote
+import random
+import sys
 
 def browser(browser="chrome"):
     """
     打开浏览器函数:Firefox、chrome、ie、phantomjs
     """
+    # 定义多终端浏览器
+    nodes = [
+        'http://192.168.25.107:5555/wd/hub',
+        'http://192.168.25.49:5555/wd/hub',
+        'http://192.168.25.107:5566/wd/hub'
+    ]
+    x = random.randint(0, 2)
+
     try:
         if browser == "firefox":
             # profile_dir = r'C:\Users\zlj.SOFT\AppData\Roaming\Mozilla\Firefox\Profiles\xvwm5zbq.default'
@@ -24,6 +35,13 @@ def browser(browser="chrome"):
             # chrome_options = Options()
             # chrome_options.add_argument('--headless')
             # driver = webdriver.Chrome(options=chrome_options)
+
+            # 分布式
+            # sys.stderr.write(nodes[x])
+            # driver = Remote(command_executor=nodes[x],
+            #                     desired_capabilities={'platform': 'ANY', 'browserName': 'chrome', 'version': '',
+            #                                           'javascriptEnabled': True})
+
             # Chrome有界面模式
             driver = webdriver.Chrome()
             return driver
