@@ -1,0 +1,25 @@
+1、 简介
+
+Selenium Grid是Selenium的三大组件（ Selenium Webdriver, Selenium IDE ）之一，作用是分布式执行测试；
+它的分布式分布式结构：由一个hub节点和若干个node代理节点组成，即是所谓的master-slave（hub-node）模式。
+其中，Hub 用来管理 Node 代理节点的注册、状态信息，接受客户端代码的调用，将命令分发给 Node 来执行。
+2、 配置
+
+   2.1 下载Selenium Server的Jar包：selenium-server-standalone-3.141.59.jar
+
+        注意：3.141.0版本有Bug,在同一台机器上开hub和node会报错
+
+  2.2  在作为hub的机器上放一份Jar包，然后命令行开启hub:
+
+        C:\Python>java -jar selenium-server-standalone-3.141.59.jar -role hub
+
+  2.3 在作为node的机器上放同样的Jar包，命令行开启node:
+
+        D:\Toolkit>java -jar selenium-server-standalone-3.141.59.jar -role node -hub http://192.168.25.107:4444/grid/register/
+
+  或在Hub机器上同时开户node:
+
+        C:\Python>java -jar selenium-server-standalone-3.141.59.jar -role node -port 5566
+————————————————
+版权声明：本文为CSDN博主「zljun8210」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/zljun8210/article/details/123252399
