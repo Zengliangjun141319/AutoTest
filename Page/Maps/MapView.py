@@ -1,4 +1,4 @@
-from Common.operater import Operater
+from operater import Operater
 from time import sleep
 
 class MapView(Operater):
@@ -50,7 +50,7 @@ class MapView(Operater):
     # Trip Report
     TripReport_loc = ('id', 'btnLoadTrip')
     closeTrip_loc = ('id', 'btnClearTrip')
-    TripReports_loc = ('xpath', '//*[@id="tbTrips"]/tbody/tr')
+    TripReports_loc = ('xpath', '//*[@id="tbTrips"]/tr')
 
     # Jobsite列表
     selectAllCheck_loc = ('id', 'chkSelectAll')
@@ -79,9 +79,12 @@ class MapView(Operater):
     editAsset_loc = ('class name', 'iconasset')
     closeTooltip_loc = ('class name', 'titleButton close')
 
+    # Odometer单位
+    odounit_loc = ('xpath', '//*[@id="assetDetailCtrl"]/div[1]/div[2]/label[6]')
+
     # 地图上Jobsite Tooltip
-    editJobsite_loc = ('xpath', '//*[@id="JobsiteDetailCtrl"]/div/div[1]/img')
-    jobsiteSendmail_loc = ('xpath', '//*[@id="JobsiteDetailCtrl"]/div/div[1]/span')
+    editJobsite_loc = ('xpath', '//*[@id="JobsiteDetailCtrl"]/div/div[1]/span[@title="Edit Jobsite"]')
+    jobsiteSendmail_loc = ('xpath', '//*[@id="JobsiteDetailCtrl"]/div/div[1]/span[@title="Send Jobsite"]')
     jobsitesendothermail_loc = ('id', 'sendlocation_otheremailaddress')
     jobsitesendothertext_loc = ('id', 'sendlocation_othertextaddress')
     jobsitesendDesc_loc = ('id', 'sendlocation_desc')
