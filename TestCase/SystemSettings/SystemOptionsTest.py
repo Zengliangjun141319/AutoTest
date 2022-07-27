@@ -21,7 +21,7 @@ from selenium.webdriver.support.select import Select
 from Page.Maps.MapView import MapView
 from logger import Log
 import time
-from Common.cmdLine import restartService
+from Common.cmdLine import *
 
 log = Log()
 path = '.\\report'
@@ -150,7 +150,8 @@ class SystemOptionsTest(unittest.TestCase):
         '''测试系统设置Odo单位'''
         uns = self.setunitOdo()
         time.sleep(10)
-        restart = restartService()
+        # restart = restartService()
+        restart = ps()
         if restart:
             re = self.checkOdoUnit(uns)
             if re:

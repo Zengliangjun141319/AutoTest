@@ -18,18 +18,18 @@ import time
 import sys
 
 
-def restartService(node='192.168.25.210', servicename='FleetService_V2'):
+def restartService(node='ip or computername', servicename='FleetService_V2'):
     # 重启服务
     ex = 'Method execution successful.'
     err = 'No Instance(s) Available.'
-    s = os.popen('wmic /node:%s /user:soft\demo /password:Soft.rz SERVICE where name="%s" call stopservice' % (node, servicename))
+    s = os.popen('wmic /node:%s /user:user /password:password SERVICE where name="%s" call stopservice' % (node, servicename))
     sres = s.read()
     s.close()
     time.sleep(3)
 
     if ex in sres:
         # sys.stdout.write('Service Stop Successfully!')
-        tsr = os.popen('wmic /node:%s /user:soft\demo /password:Soft.rz SERVICE where name="%s" call startservice' % (node, servicename))
+        tsr = os.popen('wmic /node:%s /user:user /password:password SERVICE where name="%s" call startservice' % (node, servicename))
         ts = tsr.read()
         tsr.close()
         if ex in ts:
@@ -42,8 +42,25 @@ def restartService(node='192.168.25.210', servicename='FleetService_V2'):
         # sys.stdout.write('Service not exit')
         return False
 
+def ps(name='computername', sname='FleetService_V2'):
+    import subprocess
+    # try:
+    #     output = subprocess.check_output(["powershell.exe", "Invoke-Command -ComputerName %s -ScriptBlock {Get-Service -Name %s | Restart-Service}" % (name, sname)], shell=True)
+    # except subprocess.CalledProcessError as e:
+    #     print("Error: ", e)
+    # else:
+    #     print(output.decode())
+    try:
+        res = subprocess.run(["powershell.exe", "Invoke-Command -ComputerName %s -ScriptBlock {Get-Service -Name %s | Restart-Service}" % (name, sname)], stdout=subprocess.PIPE)
+    except:
+        return False
+    else:
+        if res.returncode == 0:
+            return True
 
 if __name__ == "__main__":
-    restartService()
-    # restartService('192.168.25.107', 'FISVCHOST_191126101201')
+    # restartService()
+    # restartService('FISVCHOST_191126101201')
+    ps(sname='foresightpublicservices')
+
 
