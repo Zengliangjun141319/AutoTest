@@ -1,6 +1,9 @@
 # AutoTest
 Python + Selenium + Unittest + HTMLTestRunner
 
+[2022.7.27]
+1. Implement remote server management
+
 [2022.7.14]
 
 1. Add Selenium Grid config Doc and Jar package(at ./Tools)
