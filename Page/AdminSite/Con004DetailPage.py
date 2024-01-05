@@ -1,4 +1,4 @@
-from Common.operater import Operater
+from operater import Operater
 
 class Con004DetailPage(Operater):
     # Summary页元素

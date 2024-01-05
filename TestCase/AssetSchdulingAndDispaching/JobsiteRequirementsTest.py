@@ -4,32 +4,37 @@
    File Name：     JobsiteRequirementsTest.py
    Description :   测试Jobsite Requirements的添加、删除、查看修改记录、查看删除记录
    Author :        姜丽丽
+   Change log:
+    1、 对列表上的数据进行倒序显示，便于找到添加的结果    ---- zlj 2022.7.15
+    2、 增加对选择机器有附加机器的处理    ---- zlj 2023.10.17
 -------------------------------------------------------------------------------
 """
-from Common.operater import browser
+from operater import browser
 from Page.AssetSchdulingAndDispaching.JobsiteRequirementsPage import JobsiteRequirementsPage
 from Page.loginpage import LoginPage
-from Common.logger import Log
+from logger import Log
 import os
 import unittest
 import time
+import random
 
 log = Log()
 path = '.\\report'
 if not os.path.exists(path):
     os.mkdir(path)
 
-currentDate = time.strftime('%Y%m%d',time.localtime(time.time()))
-currentTime = time.strftime('%Y%m%d-%H%M%S',time.localtime(time.time()))
+currentDate = time.strftime('%Y%m%d', time.localtime(time.time()))
+currentTime = time.strftime('%Y%m%d-%H%M%S', time.localtime(time.time()))
 pointOfContact = 'test'+currentTime
+
 
 class JobsiteRequirementsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        log.info('----测试用例开始----')
         cls.driver = browser()
         cls.log = LoginPage(cls.driver)
-        cls.log.login('atrequirement@iicon006.com','Win.12345')
+        cls.log.login('atrequirement@iicon006.com', 'Win.12345')
+        log.info('------开始测试Jobsite requirements----')
         cls.to_frame(cls)
 
     @classmethod
@@ -40,15 +45,6 @@ class JobsiteRequirementsTest(unittest.TestCase):
         self.requirement = JobsiteRequirementsPage(self.driver)
         self.driver.implicitly_wait(60)
         time.sleep(5)
-        # try:
-        #     self.requirement.click(self.requirement.dispatchmenu_loc)
-        #     time.sleep(3)
-        #     self.requirement.click(self.requirement.requirementsManage_loc)
-        #     time.sleep(2)
-        # except:
-        #     log.info('--------打开Jobsite Requirements列表失败！--------')
-        # else:
-        #     log.info('--------打开Jobsite Requirements列表成功！--------')
         self.requirement.switch_to_iframe(self.requirement.iframe_loc)
         time.sleep(5)
 
@@ -62,7 +58,7 @@ class JobsiteRequirementsTest(unittest.TestCase):
             log.info('----打开requirement添加页面失败!----')
         else:
             log.info('----打开requirement添加页面成功!----')
-            self.requirement.select_by_index(self.requirement.jobsiteSelect_loc,1)
+            self.requirement.select_by_index(self.requirement.jobsiteSelect_loc, random.randint(1, 10))
             time.sleep(1)
             self.requirement.send_keys(self.requirement.beginDate_loc, currentDate)
             self.requirement.send_keys(self.requirement.endDate_loc, currentDate)
@@ -80,7 +76,12 @@ class JobsiteRequirementsTest(unittest.TestCase):
                 self.requirement.click(self.requirement.applyBtn_loc)
                 self.requirement.click(self.requirement.manageAssetBtn_loc)
                 self.requirement.click(self.requirement.firstAsset_loc)
-                self.requirement.click(self.requirement.selectAssetOKBtn_loc)
+                try:
+                    self.requirement.click(self.requirement.selectAssetOKBtn_loc)
+                except:
+                    #  存在机器有附加机器
+                    self.requirement.click(self.requirement.selectAttaassetOK_btn)
+                    self.requirement.click(self.requirement.selectAssetOKBtn_loc)
                 try:
                     self.requirement.click(self.requirement.saveBtn_loc)
                     self.requirement.click(self.requirement.continueBtn_loc)
@@ -94,12 +95,16 @@ class JobsiteRequirementsTest(unittest.TestCase):
 
     def verify_add(self, contact):
         #  # 根据’pointOfContact‘的内容查找table中是否有刚才添加的记录
-        # self.requirement.clear(self.requirement.latestDate_loc)
-        # time.sleep(1)
-        # self.requirement.click(self.requirement.latestDate_loc)
         time.sleep(1)
         self.requirement.click(self.requirement.unscheduledBox_loc)
         time.sleep(3)
+        # 对开始时间倒序操作    ----  zlj 2022.7.15
+        # 第一次点击，升序
+        self.requirement.click(self.requirement.beginSort_loc)
+        time.sleep(1)
+        # 第二次点击，降序排序
+        self.requirement.click(self.requirement.beginSort_loc)
+        time.sleep(1)
         try:
             table = self.driver.find_element_by_class_name('data-grid-body-content')
             rows = table.find_elements_by_tag_name('tr')
@@ -147,7 +152,12 @@ class JobsiteRequirementsTest(unittest.TestCase):
                             return False
                         else:
                             time.sleep(1)
-                            self.requirement.click(self.requirement.deleteYesBtn_loc)
+                            try:
+                                self.requirement.click(self.requirement.deleteYesBtn_loc)
+                            except:
+                                self.driver.switch_to.default_content()
+                                self.requirement.click(self.requirement.deleteYesBtn_loc)
+                                self.requirement.switch_to_iframe(self.requirement.iframe_loc)
                             log.info('-----删除Requirement成功！----')
                             return True
 
@@ -167,7 +177,6 @@ class JobsiteRequirementsTest(unittest.TestCase):
                 log.info('-----打开Deleted Jobsite Requirements页面失败！----')
             else:
                 log.info('-----打开Deleted Jobsite Requirements页面成功！----')
-
 
     def verify_delete_records(self, contact):
         # 根据’pointOfContact‘的内容查找table中是否有刚才删除的记录
@@ -244,11 +253,12 @@ class JobsiteRequirementsTest(unittest.TestCase):
         time.sleep(3)
         self.view_deleted_records()
         res = self.verify_delete_records(pointOfContact)
-        if res == True:
+        if res:
             log.info('-----查看Deleted Jobsite Requirements成功，页面记录正确！----')
         else:
             log.info('-----查看Deleted Jobsite Requirements失败！----')
         self.assertTrue(res)
+
 
 if __name__ == "__main__":
     unittest.main()

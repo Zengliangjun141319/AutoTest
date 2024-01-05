@@ -2,6 +2,8 @@
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.firefox.options import Options as fOptions
+from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.select import Select
 from selenium.common.exceptions import *   # 导入所有的异常类
@@ -10,6 +12,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver import Remote
 import random
 import sys
+import os, time
+
 
 def browser(browser="chrome"):
     """
@@ -23,27 +27,54 @@ def browser(browser="chrome"):
     ]
     x = random.randint(0, 2)
 
+    # 定义下载路径
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    downloads = os.path.abspath(os.path.join(BASE_DIR, ".\\report"))
+
     try:
         if browser == "firefox":
-            # profile_dir = r'C:\Users\zlj.SOFT\AppData\Roaming\Mozilla\Firefox\Profiles\xvwm5zbq.default'
+            # profile_dir = r'C:\Users\zlj\AppData\Roaming\Mozilla\Firefox\Profiles\i40450n1.default-release'
             # profile = webdriver.FirefoxProfile(profile_dir)
             # driver = webdriver.Firefox(profile)
-            driver = webdriver.Firefox()
+            sys.stderr.write("------ 这里是Firefox浏览器 ------\n")
+            options = fOptions()
+            driver = webdriver.Firefox(firefox_options=options,firefox_binary=r'C:\Program Files\Mozilla Firefox\firefox.exe')
             return driver
-        elif browser == "chrome":
+        elif browser == "chromeH":
             # Chrome无界面模式
-            # chrome_options = Options()
-            # chrome_options.add_argument('--headless')
-            # driver = webdriver.Chrome(options=chrome_options)
-
+            sys.stderr.write("------ 这里是Chrome无界面模式 ------\n")
+            chrome_options = Options()
+            chrome_options.add_argument('--headless')
+            chrome_options.add_argument('--ignore-certificate-errors')  # 屏蔽HTTPS非信任站点
+            # 设置浏览器默认下载路径
+            prefs = {"download.default_directory": downloads}
+            chrome_options.add_experimental_option("prefs", prefs)
+            driver = webdriver.Chrome(options=chrome_options)
+            return driver
+        elif browser == "chromeR":
             # 分布式
-            # sys.stderr.write(nodes[x])
+            sys.stderr.write(nodes[x])
             # driver = Remote(command_executor=nodes[x],
             #                     desired_capabilities={'platform': 'ANY', 'browserName': 'chrome', 'version': '',
             #                                           'javascriptEnabled': True})
 
-            # Chrome有界面模式
-            driver = webdriver.Chrome()
+            # 设置浏览器默认下载路径
+            prefs = {"download.default_directory": downloads}
+            chrome_options = Options()
+            chrome_options.add_argument('--ignore-certificate-errors')  # 屏蔽HTTPS非信任站点
+            chrome_options.add_experimental_option("prefs", prefs)
+            driver = Remote(command_executor=nodes[x],
+                                desired_capabilities=chrome_options.to_capabilities())
+            return driver
+        elif browser == "chrome":
+            # Chrome正常模式
+            # 设置浏览器默认下载路径
+            sys.stderr.write("------ 这里是Chrome正常模式 ------\n")
+            prefs = {"download.default_directory": downloads}
+            chrome_options = Options()
+            chrome_options.add_argument('--ignore-certificate-errors')  # 屏蔽HTTPS非信任站点
+            chrome_options.add_experimental_option("prefs", prefs)
+            driver = webdriver.Chrome(options=chrome_options)
             return driver
         elif browser == "ie":
             driver = webdriver.Ie()
@@ -55,6 +86,7 @@ def browser(browser="chrome"):
             print("Not found this browser, You can enter 'firefox','chrome','ie' or 'phantomjs'")
     except Exception as msg:
         print("%s" % msg)
+
 
 class Operater(object):
     """基于原生的selenium 框架做的二次封装。"""
@@ -92,22 +124,11 @@ class Operater(object):
         '''
         element = WebDriverWait(self.driver, timeout, 1).until(EC.visibility_of_element_located(locator))
         return element
-        # try:
-        #     element = WebDriverWait(self.driver, timeout, 1).until(EC.visibility_of_element_located(locator))
-        #     return element
-        # except BaseException as msg:
-        #     print("Error: %s" % msg)
-
 
     def find_elements(self, locator, timeout=10):
         '''定位一组元素'''
         elements = WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located(locator))
         return elements
-        # try:
-        #     elements = WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located(locator))
-        #     return elements
-        # except BaseException as msg:
-        #     print("Error: %s" % msg)
 
     def clear(self, locator):
         """
@@ -118,11 +139,6 @@ class Operater(object):
         """
         element = self.find_element(locator)
         element.clear()
-        # try:
-        #     element = self.find_element(locator)
-        #     element.clear()
-        # except BaseException as msg:
-        #     print("Error: %s" % msg)
 
     def click(self, locator):
         """
@@ -133,11 +149,6 @@ class Operater(object):
         """
         element = self.find_element(locator)
         element.click()
-        # try:
-        #     element = self.find_element(locator)
-        #     element.click()
-        # except BaseException as msg:
-        #     print("Error: %s" % msg)
 
     def send_keys(self, locator, text):
         '''
@@ -149,12 +160,6 @@ class Operater(object):
         element = self.find_element(locator)
         element.clear()
         element.send_keys(text)
-        # try:
-        #     element = self.find_element(locator)
-        #     element.clear()
-        #     element.send_keys(text)
-        # except BaseException as msg:
-        #     print("Error: %s" % msg)
 
     def is_text_in_element(self, locator, text, timeout=10):
         '''
@@ -165,7 +170,7 @@ class Operater(object):
         try:
             result = WebDriverWait(self.driver, timeout).until(EC.text_to_be_present_in_element(locator, text))
         except:
-            print("元素没定位到：" + str(locator))
+            # print("元素没定位到：" + str(locator))
             return False
         else:
             return result
@@ -179,7 +184,7 @@ class Operater(object):
         try:
             result = WebDriverWait(self.driver, timeout).until(EC.text_to_be_present_in_element_value(locator, value))
         except:
-            print("元素没定位刡：" + str(locator))
+            # print("元素没定位刡：" + str(locator))
             return False
         else:
             return result
@@ -190,7 +195,7 @@ class Operater(object):
         try:
             result = WebDriverWait(self.driver, timeout).until(EC.title_is(title))
         except:
-            print("元素没定位到")
+            # print("元素没定位到")
             return False
         else:
             return result
@@ -200,7 +205,7 @@ class Operater(object):
         try:
             result = WebDriverWait(self.driver, timeout).until(EC.title_contains(title))
         except:
-            print("元素没定位到")
+            # print("元素没定位到")
             return False
         else:
             return result
@@ -210,7 +215,7 @@ class Operater(object):
         try:
             result = WebDriverWait(self.driver, timeout).until(EC.element_located_to_be_selected(locator))
         except:
-            print("元素没定位到")
+            # print("元素没定位到")
             return False
         else:
             return result
@@ -221,7 +226,7 @@ class Operater(object):
         try:
             result = WebDriverWait(self.driver, timeout).until(EC.element_located_selection_state_to_be(locator, selected))
         except:
-            print("元素没定位到")
+            # print("元素没定位到")
             return False
         else:
             return result
@@ -233,7 +238,7 @@ class Operater(object):
         try:
             result = WebDriverWait(self.driver, timeout).until(EC.alert_is_present())
         except:
-            print("元素没定位到")
+            # print("元素没定位到")
             return False
         else:
             return result
@@ -244,7 +249,7 @@ class Operater(object):
         try:
             result = WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located(locator))
         except:
-            print("元素没定位到")
+            # print("元素没定位到")
             return False
         else:
             return result
@@ -255,7 +260,7 @@ class Operater(object):
         try:
             result = WebDriverWait(self.driver, timeout).until(EC.invisibility_of_element_located(locator),"Fail")
         except:
-            print("已找到元素")
+            # print("已找到元素")
             return False
         else:
             return result
@@ -265,7 +270,7 @@ class Operater(object):
         try:
             result = WebDriverWait(self.driver, timeout).until(EC.element_to_be_clickable(locator))
         except:
-            print("元素没定位到")
+            # print("元素没定位到")
             return False
         else:
             return result
@@ -275,7 +280,7 @@ class Operater(object):
         try:
             result = WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located(locator))
         except:
-            print("元素没定位到")
+            # print("元素没定位到")
             return False
         else:
             return result
@@ -288,11 +293,6 @@ class Operater(object):
         """
         element = self.find_element(locator)
         ActionChains(self.driver).move_to_element(element).perform()
-        # try:
-        #     element = self.find_element(locator)
-        #     ActionChains(self.driver).move_to_element(element).perform()
-        # except:
-        #     print("元素没定位到")
 
     def back(self):
         self.driver.back()
@@ -340,31 +340,16 @@ class Operater(object):
         '''通过索引,index 是索引第几个，从 0 开始'''
         element = self.find_element(locator)
         Select(element).select_by_index(index)
-        # try:
-        #     element = self.find_element(locator)
-        #     Select(element).select_by_index(index)
-        # except:
-        #     print("元素没定位到")
 
     def select_by_value(self, locator, value):
         '''通过 value 属性'''
         element = self.find_element(locator)
         Select(element).select_by_value(value)
-        # try:
-        #     element = self.find_element(locator)
-        #     Select(element).select_by_value(value)
-        # except:
-        #     print("元素没定位到")
 
     def select_by_text(self, locator, text):
         '''通过文本值定位'''
         element = self.find_element(locator)
         Select(element).select_by_visible_text(text)
-        # try:
-        #     element = self.find_element(locator)
-        #     Select(element).select_by_visible_text(text)
-        # except:
-        #     print("元素没定位到")
 
     def switch_to_iframe(self, locator):
         iframe = self.find_element(locator)
@@ -377,5 +362,3 @@ class Operater(object):
         state = self.driver.execute_script("return document.readyState")
         re = (state == "complete")
         return re
-
-    # if __name__ == '__main__':

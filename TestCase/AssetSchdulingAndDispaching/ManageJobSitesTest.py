@@ -6,15 +6,16 @@
    Author :        姜丽丽
 -------------------------------------------------
 """
-from Common.operater import browser
+from operater import browser
 from Page.AssetSchdulingAndDispaching.ManageJobsitePage import ManageJobsitePage
 from Page.loginpage import LoginPage
-from Common.logger import Log
-from ddt import ddt,data
-from Common.excel import excel
+from logger import Log
+from ddt import ddt, data
+from excel import excel
 import os
 import unittest
 import time
+from queryMSSQL import delSQL
 
 log = Log()
 path = '.\\report'
@@ -28,15 +29,21 @@ testData = excel.get_list(file_path)
 class ManageJobSitesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        log.info('----开始测试Jobsite管理----')
         cls.driver = browser()
         cls.log = LoginPage(cls.driver)
-        cls.log.login('atjobsite@iicon006.com','Win.12345')
+        cls.log.login('atjobsite@iicon006.com', 'Win.12345')
+        log.info('----开始测试Jobsite管理----')
+        cls.initi(cls)
         cls.to_frame(cls)
 
     @classmethod
     def tearDownClass(cls):
         cls.driver.quit()
+
+    def initi(self):
+        dbase = 'FORESIGHT_FLV_IICON_006'
+        ex_sql = "delete FROM [FORESIGHT_FLV_IICON_006].[dbo].[JOBSITES] where JOBSITENAME like '%AutoTest%'"
+        delSQL(dt=dbase, sqlstr=ex_sql)
 
     def to_frame(self):
         #
@@ -47,24 +54,63 @@ class ManageJobSitesTest(unittest.TestCase):
                 self.driver.implicitly_wait(60)
                 time.sleep(5)
                 # 已设置此测试用户只有Jobsite权限，且登录页默认为Jobsite
-                # self.jobsite.click(self.jobsite.dispatchmenu_loc)
-                # time.sleep(2)
-                # self.jobsite.click(self.jobsite.jobsiteManage_loc)
-                # time.sleep(2)
                 if self.jobsite.is_visibility(self.jobsite.iframe_loc):
                     break
                 n += 1
         except:
             log.info('--------打开Jobsites列表失败！--------')
         else:
+            # self.driver.find_element_by_id('nav_arrow').click()
+            time.sleep(1)
             log.info('--------打开Jobsites列表成功！--------')
             self.jobsite.switch_to_iframe(self.jobsite.iframe_loc)
             time.sleep(3)
 
+    def manageAssets(self):
+        # self.reset_layout()
+        self.jobsite.search('AutoTest')
+        try:
+            self.jobsite.js_execute("window.scrollTo(0,300)")
+            self.jobsite.click(self.jobsite.manangeAsset_btn)
+            time.sleep(1)
+        except:
+            log.info('没有找到可设置机器的Jobsite')
+            return False
+        else:
+            log.info('添加机器给Jobsite')
+            try:
+                self.jobsite.click(self.jobsite.madd_btn)
+                time.sleep(5)
+                self.jobsite.click(self.jobsite.maddfirstAsset_chx)
+                time.sleep(1)
+                self.jobsite.click(self.jobsite.maOKBtn_loc)
+                time.sleep(2)
+            except:
+                log.info('添加机器失败')
+                return False
+            else:
+                # 勾选Onsite 并判断是否勾选上
+                check = '//*[@id="selectedmachinelist"]/div/div[1]/div/table/tbody/tr[1]/td[1]/label/input'
+                onsite = self.driver.find_element_by_xpath(check).is_selected()
+                log.info('OnSite状态为： %s' % onsite)
+                self.driver.find_element_by_xpath('//*[@id="selectedmachinelist"]/div/div[1]/div/table/tbody/tr[1]/td[1]/label/layer').click()
+                try:
+                    self.jobsite.click(self.jobsite.deleteAssetYesBtn_loc)
+                except:
+                    self.driver.switch_to.default_content()
+                    self.jobsite.click(self.jobsite.deleteAssetYesBtn_loc)
+                    self.jobsite.switch_to_iframe(self.jobsite.iframe_loc)
+                finally:
+                    time.sleep(1)
+                onsite = self.driver.find_element_by_xpath(check).is_selected()
+                log.info('OnSite状态为： %s' % onsite)
+                self.jobsite.click(self.jobsite.maCloseBtn_loc)
+                return onsite
+
     def search_and_delete(self):
         '''搜索并删除已存在的Jobsites'''
         log.info("搜索并删除带有AutoTest的测试数据")
-        self.reset_layout()
+        # self.reset_layout()
         self.jobsite.search('AutoTest')
         try:
             table = self.driver.find_element_by_class_name('data-grid-body-content')
@@ -78,13 +124,19 @@ class ManageJobSitesTest(unittest.TestCase):
             for i in range(1, trNum+1):
                 time.sleep(1)
                 try:
-                    self.jobsite.click(self.jobsite.deleteBtn_loc)    #  //*[@id="jobsitelist"]/div/div[1]/div/table/tbody/tr[2]/td[26]/a
+                    self.jobsite.click(self.jobsite.deleteBtn_loc)
                     time.sleep(1)
                 except:
                     log.info('没有可删除的数据')
                 else:
-                    self.jobsite.click(self.jobsite.deleteDialogOkBtn_loc)
-                    time.sleep(1)
+                    try:
+                        self.jobsite.click(self.jobsite.deleteDialogOkBtn_loc)
+                        time.sleep(1)
+                    except:
+                        self.driver.switch_to.default_content()
+                        self.jobsite.click(self.jobsite.deleteDialogOkBtn_loc)
+                        time.sleep(1)
+                        self.jobsite.switch_to_iframe(self.jobsite.iframe_loc)
                     log.info('---已删除第 %s 条记录' % i)
             log.info('----删除已存在的相同记录！----')
             return True
@@ -119,9 +171,16 @@ class ManageJobSitesTest(unittest.TestCase):
     def save_jobsite(self):
         try:
             self.jobsite.click(self.jobsite.saveBtn_loc)
-            time.sleep(3)
-            self.msg = self.jobsite.get_text(self.jobsite.saveDialog_loc)
-            self.jobsite.click(self.jobsite.saveDialogOkBtn_loc)
+            while True:
+                try:
+                    self.msg = self.jobsite.get_text(self.jobsite.saveDialog_loc)
+                    self.jobsite.click(self.jobsite.saveDialogOkBtn_loc)
+                except:
+                    time.sleep(2)
+                    continue
+                else:
+                    time.sleep(1)
+                    break
         except:
             log.info('-----保存Jobsite失败！！-----')
         else:
@@ -170,20 +229,13 @@ class ManageJobSitesTest(unittest.TestCase):
                 # log.info('--------上传附件成功！--------')
                 self.jobsite.click(self.jobsite.matchOKBtn_loc)
                 time.sleep(1)
-                self.jobsite.click(self.jobsite.importOKBtn_loc)
+                try:
+                    self.jobsite.click(self.jobsite.importOKBtn_loc)
+                except:
+                    self.driver.switch_to.default_content()
+                    self.jobsite.click(self.jobsite.importOKBtn_loc)
+                    self.jobsite.switch_to_iframe(self.jobsite.iframe_loc)
                 time.sleep(1)
-
-        # # 搜索刚导入的jobsite，看是否成功导入
-        # self.jobsite.send_keys(self.jobsite.searchInbox_loc, 'AutoTest001')
-        # self.jobsite.click(self.jobsite.searchButton_loc)
-        # time.sleep(1)
-        #
-        # target = self.jobsite.get_text(self.jobsite.td1_loc) # 获取元素的Title属性值
-        #
-        # if target == 'AutoTest001':
-        #     return True
-        # else:
-        #     return False
 
     def search_and_verify(self, jobsite):
         # 搜索并遍历table查找jobsite是否存在
@@ -274,6 +326,8 @@ class ManageJobSitesTest(unittest.TestCase):
                     time.sleep(2)
                     log.info("页面未加载完，继续等待...")
                     continue
+            # self.driver.find_element_by_id('nav_arrow').click()
+            time.sleep(1)
             self.jobsite.switch_to_iframe(self.jobsite.iframe_loc)
             time.sleep(1)
             self.jobsite.click(self.jobsite.resetLayoutBtn_loc)
@@ -284,6 +338,8 @@ class ManageJobSitesTest(unittest.TestCase):
     def configuration(self):
         self.driver.refresh()
         self.driver.implicitly_wait(60)
+        # self.driver.find_element_by_id('nav_arrow').click()
+        time.sleep(1)
         self.jobsite.switch_to_iframe(self.jobsite.iframe_loc)
         time.sleep(2)
         try:
@@ -380,21 +436,31 @@ class ManageJobSitesTest(unittest.TestCase):
             log.info('-----导入Jobsite失败！----')
         self.assertTrue(res)
 
-    def test03_delete_jobsite(self):
+    def test03_manage_asset(self):
+        '''测试列表上为Jobsite添加机器'''
+        res = self.manageAssets()
+        if res:
+            log.info('为Jobsite添加机器成功！')
+        else:
+            log.info('为Jobsite添加机器失败！')
+        self.assertTrue(res)
+
+    def test04_delete_jobsite(self):
         '''删除添加的Jobsite'''
         res = self.search_and_delete()
         self.assertTrue(res)
 
-    def test04_layout(self):
-        '''测试Layout功能'''
-        self.reset_layout()
-        res = self.set_layout()
-        self.assertTrue(res)
+    # def test05_layout(self):
+    #     '''测试Layout功能'''
+    #     self.reset_layout()
+    #     res = self.set_layout()
+    #     self.assertTrue(res)
 
-    def test05_configuration(self):
+    def test06_configuration(self):
         '''测试Configuration功能'''
         res = self.configuration()
         self.assertTrue(res)
+
 
 if __name__ == "__main__":
     unittest.main()

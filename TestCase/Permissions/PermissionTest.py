@@ -14,13 +14,13 @@
 __author__ = 'ljzeng'
 
 import unittest
-from Common.operater import browser
+from operater import browser
 from Page.loginpage import LoginPage
-from Common.logger import Log
+from logger import Log
 import os
 import ddt
-from Common.excel import excel
-from Common.setPermissions import setPermission
+from excel import excel
+from setPermissions import setPermission
 import time
 import sys
 
@@ -46,6 +46,7 @@ inspectionPerData = excel.get_list(inspectionPer_file)
 otherPer_file = ".\\TestData\\OtherPermission.xlsx"
 otherPerData = excel.get_list(otherPer_file)
 
+
 @ddt.ddt
 class PermissionTest(unittest.TestCase):
     # 元素位置
@@ -55,13 +56,12 @@ class PermissionTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.driver = browser()
+        cls.driver = browser("chromeH")
         log.info("权限相关功能测试 ---- ")
         cls.login = LoginPage(cls.driver)
         cls.login.login('atpermission@iicon004.com', 'Win.12345')
         cls.driver.implicitly_wait(60)
         time.sleep(10)
-
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -243,6 +243,7 @@ class PermissionTest(unittest.TestCase):
         else:
             log.info('------测试失败')
         self.assertTrue(res)
+
 
 if __name__ == '__main__':
     unittest.main()

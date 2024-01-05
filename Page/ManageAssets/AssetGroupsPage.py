@@ -1,5 +1,7 @@
-from Common.operater import Operater
+from operater import Operater
 from time import sleep
+from Page.comms import *
+
 
 class AseetGroupsPage(Operater):
     # 左侧滑块大图标
@@ -19,23 +21,27 @@ class AseetGroupsPage(Operater):
 
     # 机器组管理页面元素
     iframeMachineGroup_loc = ('id', 'iframe_machinegroup')  # 添加机器组页面又是iframe
-    saveBtn_loc = ('xpath', '//*[@id="div_content"]/div[2]/span[1]')    # save按钮
-    saveAndExitBtn_loc = ('xpath', '//*[@id="div_content"]/div[2]/span[2]')    # save and exit按钮
-    exitWithoutSavingBtn_loc = ('xpath', '//*[@id="div_content"]/div[2]/span[3]')   # exit without saving按钮
+    saveBtn_loc = ('xpath', '//*[@id="div_content"]/div[@class="function_title"]/span[1]')    # save按钮
+    saveAndExitBtn_loc = ('xpath', '//*[@id="div_content"]/div[@class="function_title"]/span[2]')    # save and exit按钮
+    exitWithoutSavingBtn_loc = ('xpath', '//*[@id="div_content"]/div[@class="function_title"]/span[3]')   # exit without saving按钮
     groupName_loc = ('id', 'dialog_groupname')  # Group Name文本框
     groupCode_loc = ('id', 'dialog_groupcode')  # Code文本框
     description_loc = ('id', 'dialog_description')  # Description多行文本框
 
     addAssetsBtn_loc = ('xpath', '//*[@id="divcontent"]/div/span[3]')   # 添加机器按钮
-    firstAsset_loc = ('xpath', '//*[@id="dialog_machines"]/div[2]/div[4]/div/div/div/table/tbody/tr[1]/td[1]/input') # 机器选择页面的第一台机器
+    # 元素位置变更  2022.9.5  zlj
+    # 控件更新导致元素位置变化 2023.3.31 zlj
+    # 机器选择页面的第一台机器
+    firstAsset_loc = ('xpath', '//*[@id="dialog_machines"]/div[2]/div[5]/div/div[1]/div/table/tbody/tr[1]/td[1]/%s' % grid_ck)
+
     assetOkBtn_loc = ('xpath', '//*[@id="dialog_machines"]/div[3]/input[2]')    # 机器复选框
 
-    saveDialog_loc = ('xpath','/html/body/div[5]/div[2]') # save后的对话框
+    saveDialog_loc = ('xpath', '/html/body/div[5]/div[2]')  # save后的对话框
     saveDialogOkBtn_loc = ('xpath', '/html/body/div[5]/div[3]/input')   # 对话框上的OK按钮
 
     # 删除机器组相关元素
-    deleteBtn_loc = ('xpath','//*[@id="grouplist"]/div/div/div/table/tbody/tr[1]/td[5]') # 删除机器组按钮
-    deleteDialogOkBtn_loc = ('xpath','/html/body/div[3]/div[3]/input[2]') #确认删除按钮
+    deleteBtn_loc = ('xpath', '//*[@id="grouplist"]/div/div/div/table/tbody/tr[1]/td[5]')  # 删除机器组按钮
+    deleteDialogOkBtn_loc = ('xpath', yes_btn)  # 确认删除按钮
 
     # 编辑机器组相关元素
     editBtn_loc = ('xpath', '//*[@id="grouplist"]/div/div/div/table/tbody/tr[1]/td[4]')

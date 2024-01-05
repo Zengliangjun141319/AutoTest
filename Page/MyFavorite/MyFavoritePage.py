@@ -1,9 +1,10 @@
 # coding:utf-8
 
-from Common.operater import Operater
+from operater import Operater
+from Page.comms import *
+
 
 class MyFavoritePage(Operater):
-
     # 添加收藏按钮
     addfavorite_loc = ('id', "divfavadd")
 
@@ -29,7 +30,7 @@ class MyFavoritePage(Operater):
     downmoverbotton_loc = ('xpath', ".//*[@id='favoritelist']/div/div/div/table/tbody/tr[1]/td[4]/a")
 
     # 删除提示信息确认按钮
-    msgboxokbutton_loc = ('xpath', "html/body/div[@class='dialog popupmsg']/div[3]/input[2]")
+    msgboxokbutton_loc = ('xpath', yes_btn)
 
     # 列表框关闭按钮
     closebutton_loc = ('xpath', ".//*[@id='dialog_favorite']/div[1]/em")

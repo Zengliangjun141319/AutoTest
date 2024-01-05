@@ -1,17 +1,22 @@
 # coding: utf-8
 
 import time
-from Common.operater import browser
+from operater import browser
 from Page.loginpage import LoginPage
 import unittest
 from Page.AssetHealth.CustomerRecordPage import CustomerRecordPage
-from Common.logger import Log
+from logger import Log
+from skiptest import skip_dependon
 
 log = Log()
 ct = time.strftime("%H%M%S")
 ctname = 'Customer' + ct
 
+
+# noinspection PyTypeChecker
 class CustomerRecordTest(unittest.TestCase):
+    login = None
+    driver = None
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -24,22 +29,29 @@ class CustomerRecordTest(unittest.TestCase):
         cls.customer = CustomerRecordPage(cls.driver)
         cls.open_manage_customer(cls)
 
-
     @classmethod
     def tearDownClass(cls) -> None:
         cls.driver.quit()
 
-
     def open_manage_customer(self):
-        time.sleep(5)
+        time.sleep(3)
+        coll = self.driver.find_element_by_xpath('//*[@id="nav_arrow"]/div').get_attribute("class")
+        while True:
+            if coll != 'icn collapse':
+                self.driver.find_element_by_id('nav_arrow').click()
+                continue
+            else:
+                log.info('菜单已收折')
+                break
         self.customer.switch_to_iframe(self.customer.iframe_loc)
         time.sleep(2)
 
     def add_customer(self):
         try:
             self.customer.click(self.customer.addbutton_loc)
-        except:
+        except Exception as e:
             log.info("-----打开Customer新增窗口失败-----")
+            return False
         else:
             log.info("-----打开Customer新增窗口成功-----")
             time.sleep(3)
@@ -62,7 +74,6 @@ class CustomerRecordTest(unittest.TestCase):
             self.driver.switch_to.default_content()
             return result and res
 
-
     def delete_customer(self):
         log.info('删除新添加的Customer')
         try:
@@ -84,17 +95,20 @@ class CustomerRecordTest(unittest.TestCase):
         try:
             self.customer.click(self.customer.deletecustomer_loc)
             time.sleep(1)
-            self.customer.click(self.customer.deletecustomeryes_loc)
-            time.sleep(1)
+            try:
+                self.customer.click(self.customer.deletecustomeryes_loc)
+            except:
+                log.info('button location change')
+                self.driver.switch_to.default_content()
+                self.customer.click(self.customer.deletecustomeryes_loc)
+                self.customer.switch_to_iframe(self.customer.iframe_loc)
+                time.sleep(1)
         except:
             # log.info("-----查询不到该Customer-----")
             return False
         else:
             return True
             # log.info("-----删除该Customer-----")
-
-
-
 
     def search_customer(self, words):
         log.info("-----开始查询-----")
@@ -109,7 +123,6 @@ class CustomerRecordTest(unittest.TestCase):
         # self.customer.switch_to_iframe(self.customer.iframe_loc)
         res = (txt == ctname)
         return res
-
 
     def add_contact(self):
         currenttime1 = time.strftime("%Y%m%d%H%M%S")
@@ -132,22 +145,31 @@ class CustomerRecordTest(unittest.TestCase):
             time.sleep(3)
             return True
 
-
     def assign_asset(self):
         log.info("-----为Customer分配机器-----")
         try:
+            self.customer.clear(self.customer.searchinput_loc)
+            self.customer.send_keys(self.customer.searchinput_loc, ctname)
+            self.customer.click(self.customer.searchbutton_loc)
+            time.sleep(3)
+
             self.customer.click(self.customer.assignedasset_loc)
             time.sleep(2)
-        except:
+        except Exception as e:
             log.info('没有数据')
             return False
         else:
             self.customer.click(self.customer.addassetbutton_loc)
             # 检查数据是否加载完
             time.sleep(3)
+            k = 0
             while not self.customer.is_visibility(self.customer.assetcheckbutton_loc):
                 log.info('机器数据未加载完，等待3秒再重试！')
                 time.sleep(3)
+                if k == 3:
+                    break
+                else:
+                    k += 1
             self.customer.send_keys(self.customer.searchassetinput_loc, '01X06771')
             self.customer.click(self.customer.searchassetbutton_loc)
             time.sleep(2)
@@ -169,19 +191,18 @@ class CustomerRecordTest(unittest.TestCase):
             time.sleep(2)
             return res
 
-
-
-
     def test01_add_customer(self):
-        '''测试新建Customer'''
+        """测试新建Customer"""
         res = self.add_customer()
         if res:
             log.info("新增Customer成功！")
         else:
             log.info("新增Customer失败！")
+        self.assertTrue(res)
 
+    @skip_dependon(depend='test01_add_customer')
     def test02_search_customer(self):
-        '''测试搜索新建的Customer'''
+        """测试搜索新建的Customer"""
         result1 = self.search_customer(ctname)
         if result1:
             log.info("查询成功！")
@@ -189,8 +210,9 @@ class CustomerRecordTest(unittest.TestCase):
             log.info("查询失败！")
         self.assertTrue(result1)
 
+    @skip_dependon(depend='test01_add_customer')
     def test03_assignasset(self):
-        '''测试为Customer分配机器'''
+        """测试为Customer分配机器"""
         res = self.assign_asset()
         if res:
             log.info("分配机器成功！")
@@ -198,8 +220,9 @@ class CustomerRecordTest(unittest.TestCase):
             log.info("分配机器失败")
         self.assertTrue(res)
 
+    @skip_dependon(depend='test01_add_customer')
     def test04_delete_Customer(self):
-        '''测试删除Customer'''
+        """测试删除Customer"""
         time.sleep(2)
         res = self.delete_customer()
         self.assertTrue(res)
@@ -207,5 +230,3 @@ class CustomerRecordTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-

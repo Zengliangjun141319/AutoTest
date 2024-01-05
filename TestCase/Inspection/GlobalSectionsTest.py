@@ -7,14 +7,14 @@
 -------------------------------------------------
 """
 from Page.loginpage import LoginPage
-from Page.Inspection.GlobalSectionsPage import GlobalSectionsPage
-from Common.logger import Log
-from Common.operater import browser
+from Page.Inapection.GlobalSectionsPage import GlobalSectionsPage
+from logger import Log
+from operater import browser
 import pymssql
 import unittest
 import time
 import os
-from Common.skiptest import skip_dependon
+from skiptest import skip_dependon
 
 log = Log()
 path = '.\\report'
@@ -25,13 +25,17 @@ if not os.path.exists(path):
 
 current_time = time.strftime('%Y%m%d%H%M%S',time.localtime(time.time()))
 
+
 class GlobalSectionsTest(unittest.TestCase):
+    login = None
+    driver = None
+
     @classmethod
     def setUpClass(self) -> None:
-        log.info('--------开始测试Inspection Global Section--------')
         self.driver = browser()
         self.login = LoginPage(self.driver)
-        self.login.login('autotest@iicon006.com','Win.12345')
+        self.login.login('autotest@iicon006.com', 'Win.12345')
+        log.info('--------开始测试Inspection Global Section--------')
         self.driver.implicitly_wait(60)
         log.info('--------成功登录--------')
         if not self.open_globalSections(self):
@@ -42,12 +46,14 @@ class GlobalSectionsTest(unittest.TestCase):
         self.section = GlobalSectionsPage(self.driver)
         try:
             self.section.click(self.section.inspection_loc)
+            self.section.click(self.section.exButton_loc)
             self.section.click(self.section.globalSections_loc)
         except:
             log.info('--------打开Global Sections列表失败！--------')
             return False
         else:
             log.info('--------打开Global Sections列表成功！--------')
+            self.section.click(self.section.exButton_loc)
             return True
 
     def input_globalSection_information(self):
@@ -83,10 +89,10 @@ class GlobalSectionsTest(unittest.TestCase):
         log.info('查找并删除新建的Global Section')
         lists = self.driver.find_elements_by_xpath('//*[@id="set_right"]/div/div[3]/div')
         for ls in lists:
-            secname = ls.find_element_by_xpath('./div/div[@class="section-cell section-name"]/input').get_attribute('value')
+            secname = ls.find_element_by_xpath('./div/div/div[@class="section-cell section-name"]/input').get_attribute('value')
             # log.info('Section: %s' % secname)
             if secname == current_time:
-                ls.find_element_by_xpath('./div/div[@class="section-cell section-func"]/em[@title="Delete Section"]').click()
+                ls.find_element_by_xpath('./div/div/div[@class="section-cell section-func"]/em[@title="Delete Section"]').click()
                 time.sleep(1)
                 self.driver.find_element_by_xpath('/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-func"]/input[@value="Yes"]').click()
                 time.sleep(2)
@@ -98,8 +104,8 @@ class GlobalSectionsTest(unittest.TestCase):
     def tearDownClass(self) -> None:
         self.driver.quit()
 
-    def test01_add_globalSecitons_Success(self):
-        '''测试添加Global Section'''
+    def test01_add_inspect_global_sections(self):
+        """测试添加Global Section"""
         res = False
 
         if self.input_globalSection_information():
@@ -111,10 +117,9 @@ class GlobalSectionsTest(unittest.TestCase):
             log.info('添加Global Sections失败！ ')
         self.assertTrue(res)
 
-    @skip_dependon(depend='test01_add_globalSecitons_Success')
-    def test02_del_section(self):
-        '''测试删除Global Section'''
-        res = False
+    @skip_dependon(depend='test01_add_inspect_global_sections')
+    def test02_del_inspect_global_section(self):
+        """测试删除Global Section"""
         time.sleep(3)
         res = self.del_global_Section()
         if res:
@@ -122,6 +127,7 @@ class GlobalSectionsTest(unittest.TestCase):
         else:
             log.info('删除Global失败')
         self.assertTrue(res)
+
 
 if __name__ == '__main__':
     unittest.main()

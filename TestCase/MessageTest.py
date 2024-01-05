@@ -15,43 +15,43 @@ __author__ = 'ljzeng'
 
 import unittest
 from Page.loginpage import LoginPage
-from Common.logger import Log
-from Common.operater import browser
+from logger import Log
+from operater import browser
 import unittest
 import time
 import os
 
-log = Log()
-path = '.\\report'
+log = Log("MessageTest")
 
-if not os.path.exists(path):
-    os.mkdir(path)
+# path = '.\\report'
+#
+# if not os.path.exists(path):
+#     os.mkdir(path)
 
 
 class MessageTest(unittest.TestCase):
     # 元素
     messageIcon_loc = ('id', 'iconmessage')
-    firstmessage_loc = ('xpath', '//*[@id="divmsgs"]/div[3]/div[2]/div')  # 第一条message
-    firstMessWO_loc = ('xpath', '//*[@id="divmsgs"]/div[3]/div[2]/div[1]/div[1]/a')
-    # //*[@id="divmsgs"]/div[3]/div[2]/div[1]/div[3]/em[2]
-    firstMessDel_loc = ('xpath', '//*[@id="divmsgs"]/div[3]/div[2]/div[1]/div[3]/em[2]')
+    firstmessage_loc = ('xpath', '//*[@id="divmsgcontainer"]/div/div/div')  # 第一条message
+    firstMessWO_loc = ('xpath', '//*[@id="divmsgcontainer"]/div/div/div[1]/div[1]/a')
+    firstMessDel_loc = ('xpath', '//*[@id="divmsgcontainer"]/div/div/div[1]/div[3]/em[@class="spanbtn icondelete"]')
     Delyes_loc = ('xpath', '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-func"]/input[2]')
-    firstUnreadmessage_loc = ('xpath', '//*[@id="divmsgs"]/div[3]/div[2]/div[@class="msgitem unreadmsg"]/div[1]')
-    firstUnreadMeTitle_loc = ('xpath', '//*[@id="divmsgs"]/div[3]/div[2]/div[@class="msgitem unreadmsg"]/div[2]')
+    # //*[@id="divmsgcontainer"]/div/div/div[@class="msgitem unreadmsg"]
+    firstUnreadmessage_loc = ('xpath', '//*[@id="divmsgcontainer"]/div/div/div[@class="msgitem unreadmsg"]/div[1]')
+    firstUnreadMeTitle_loc = ('xpath', '//*[@id="divmsgcontainer"]/div/div/div[@class="msgitem unreadmsg"]/div[2]')
 
     # Work Order页面元素
-    commmets_loc = ('id', 'dialog_comments')
+    commmets_loc = ('xpath', '//*[@id="communication_holder"]/div[2]/div[2]/textarea')  # ('id', 'dialog_comments')
     # //*[@id="divcontent"]/div/div[2]/div/div[2]/div[3]/div[1]/table/tbody/tr/td/div/div/span[2]
-    sendComments_loc = (
-    'xpath', '//*[@id="divcontent"]/div/div[2]/div/div[2]/div[3]/div[1]/table/tbody/tr/td/div/div/span[@class="spanbtn iconsendcomment"]')
+    sendComments_loc = ('xpath', '//*[@id="communication_holder"]/div[2]/div[2]/div/button[2]')
     sendResult_loc = ('xpath', '//*[@id="divcomments"]/div[1]/div[2]')
 
     @classmethod
     def setUpClass(cls) -> None:
         cls.driver = browser()
-        log.info("Message相关功能测试 ---- ")
         cls.login = LoginPage(cls.driver)
         cls.login.login('atmessage@iicon004.com', 'Win.12345')
+        log.info("开始测试Message相关功能 ---- ")
         cls.driver.implicitly_wait(60)
 
     @classmethod
@@ -117,18 +117,15 @@ class MessageTest(unittest.TestCase):
                 self.login.js_execute("document.getElementById('content1').scrollLeft=300")
                 time.sleep(5)
                 self.login.click(self.sendComments_loc)
-                # time.sleep(2)
-                # self.login.js_execute("document.getElementById('divcomments').scrolltop=300")
                 time.sleep(3)
-                els = self.driver.find_elements_by_xpath('//*[@id="divcomments"]/div[@class="msgdiv"]')
+                els = self.driver.find_elements_by_xpath('//*[@id="communication_holder"]/div[2]/div[3]/div[@class="item-div"]')
                 ms = []
                 for ls in els:
-                    txt = ls.find_element_by_xpath('./div[2]/div').text
+                    txt = ls.find_element_by_xpath('./div[2]/span').text
                     ms += [txt]
-                # txt = self.login.get_text(self.sendResult_loc)
-                # log.info("Send: %s" % txt)
+
                 res = False
-                for i in range(0,len(ms)):
+                for i in range(0, len(ms)):
                     log.info('Comments: %s' % ms[i])
                     if ms[i] == comms:
                         res = True
@@ -139,7 +136,6 @@ class MessageTest(unittest.TestCase):
 
             self.driver.switch_to.window(self.driver.window_handles[0])
         self.assertEqual(res, True)
-
 
     def test01_messagetest(self):
         '''测试点击阅读未读信息及删除第一条信息'''

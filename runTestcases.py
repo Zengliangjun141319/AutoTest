@@ -14,9 +14,9 @@
 __author__ = 'ljzeng'
 
 
-from Common.HTMLTestRunners import *
-from Common.sendemail import *
-from Common.queryMSSQL import commQuery
+from HTMLTestRunners import *
+from sendemail import *
+from queryMSSQL import commQuery
 import threadpool
 
 global all_result
@@ -62,16 +62,16 @@ if __name__ == "__main__":
 
     all_result = []
     cases = all_testcase()
-    task_pool = threadpool.ThreadPool(3)
+    task_pool = threadpool.ThreadPool(5)
     count = 0
     lst = []
-    for i,j in zip(cases, range(len(list(cases)))):
+    for i, j in zip(cases, range(len(list(cases)))):
         file_path = report_path + '\\' + nowtime + '_' + str(count) + '.html'
         file_path = file_path.replace("\r", r"\r").replace('\n', r'\n')
         count += 1
         # sys.stderr.write("\ncase: %s" % i)
-        lst.append(([i, file_path,j],None))
-        rqs = threadpool.makeRequests(run, lst)
+        lst.append(([i, file_path, j], None))
+    rqs = threadpool.makeRequests(run, lst)
 
     [task_pool.putRequest(req) for req in rqs]
     task_pool.wait()

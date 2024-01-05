@@ -8,12 +8,12 @@
 """
 from Page.loginpage import LoginPage
 from Page.AssetHealth.MaintenanceSchedulesPage import MaintenanceSchedulesPage
-from Common.logger import Log
-from Common.operater import browser
+from logger import Log
+from operater import browser
 import unittest
 import time
 import os
-from Common.skiptest import skip_dependon
+from skiptest import skip_dependon
 
 log = Log()
 path = '.\\report'
@@ -25,14 +25,18 @@ if not os.path.exists(path):
 current_time = time.strftime('%H%M%S')
 planName = 'AutoTest'+current_time
 
+
 class MaintenanceSchedulesTest(unittest.TestCase):
+    login = None
+    driver = None
+
     @classmethod
     def setUpClass(cls) -> None:
-        log.info('--------开始测试Maintenance Schedules--------')
-        cls.driver = browser()
+        cls.driver = browser("chromeH")
         cls.login = LoginPage(cls.driver)
-        cls.login.login('atpm@iicon006.com','Win.12345')
+        cls.login.login('atpm@iicon006.com', 'Win.12345')
         cls.driver.implicitly_wait(60)
+        log.info('--------开始测试Maintenance Schedules--------')
         time.sleep(5)
         log.info('--------成功登录--------')
         cls.to_frame(cls)
@@ -141,6 +145,53 @@ class MaintenanceSchedulesTest(unittest.TestCase):
                         log.info('-----添加interval成功！-----')
                         return True
 
+    def disable_schedules(self, plan):
+        try:
+            self.search_schedule(plan)
+        except:
+            log.info('-----搜索目标Schedule失败！-----')
+            return False
+        else:
+            time.sleep(3)
+            try:
+                self.plan.click(self.plan.manageSchedule_loc)
+                time.sleep(1)
+            except:
+                log.info('-----打开Manage Maintenance Schedule页面失败！-----')
+                return False
+            else:
+                log.info('-----打开Manage Maintenance Schedule页面成功！-----')
+                try:
+                    time.sleep(1)
+                    if self.plan.is_selected(self.plan.planEnable_loc):
+                        self.plan.click(self.plan.planEnable_loc)  # 点击一次，取消勾选
+                        time.sleep(1)
+                except Exception:
+                    log.info('------取消启用Schedule失败!')
+                    return False
+                else:
+                    try:
+                        time.sleep(1)
+                        self.plan.click(self.plan.saveAndExitBtn_loc)
+                    except:
+                        log.info('-----设置Schedule失败！-----')
+                        return False
+                    else:
+                        log.info('-----设置Schedule成功！ 待验证设置结果！！ ')
+                        try:
+                            self.search_schedule(plan)
+                        except Exception:
+                            log.info('-----搜索目标Schedule失败！-----')
+                            return False
+                        else:
+                            try:
+                                txt = self.plan.get_text(self.plan.sc_disable_loc)
+                                if txt == "Disabled":
+                                    return True
+                            except Exception:
+                                log.info('------禁用Schedule失败------')
+                                return False
+
     def manage_assets(self, plan):
         try:
             time.sleep(3)
@@ -215,7 +266,12 @@ class MaintenanceSchedulesTest(unittest.TestCase):
                 time.sleep(2)
                 self.plan.click(self.plan.deleteScheduleBtn_loc)
                 time.sleep(2)
-                self.plan.click(self.plan.deleteScheduleYesBtn_loc)
+                try:
+                    self.plan.click(self.plan.deleteScheduleYesBtn_loc)
+                except:
+                    self.driver.switch_to.default_content()
+                    self.plan.click(self.plan.deleteScheduleYesBtn_loc)
+                    self.plan.switch_to_iframe(self.plan.iframe_loc)
             except:
                 log.info('-----删除schedule失败！-----')
                 return False
@@ -256,10 +312,17 @@ class MaintenanceSchedulesTest(unittest.TestCase):
         self.assertTrue(res)
 
     @skip_dependon(depend='test01_add_plan')
-    def test05_delete_schedule(self):
+    def test05_disable_schedule(self):
+        """测试禁用Schedule"""
+        res = self.disable_schedules(planName)
+        self.assertTrue(res)
+
+    @skip_dependon(depend='test01_add_plan')
+    def test06_delete_schedule(self):
         '''删除PM计划'''
         res = self.delete_schedule(planName)
         self.assertTrue(res)
+
 
 if __name__ == '__main__':
     unittest.main()

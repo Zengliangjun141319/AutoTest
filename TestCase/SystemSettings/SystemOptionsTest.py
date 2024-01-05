@@ -19,6 +19,7 @@ from Page.loginpage import LoginPage
 from Page.SystemSettings.SystemOptions import SystemOptions
 from selenium.webdriver.support.select import Select
 from Page.Maps.MapView import MapView
+from Page.ManageAssets.ManageAssetsPage import ManageAssetsPage as masp
 from logger import Log
 import time
 from Common.cmdLine import *
@@ -30,7 +31,7 @@ path = '.\\report'
 class SystemOptionsTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        self.driver = browser()
+        self.driver = browser("chrome")
         self.login = LoginPage(self.driver)
         self.login.login("atsysop@iicon004.com", "Win.12345")
         self.driver.implicitly_wait(60)
@@ -48,6 +49,7 @@ class SystemOptionsTest(unittest.TestCase):
         st = 1
         while st <= 3:
             try:
+                self.sysOption.click(self.sysOption.exButton_loc)
                 self.sysOption.click(self.sysOption.sysOption_loc)
                 self.driver.implicitly_wait(60)
                 time.sleep(3)
@@ -56,6 +58,7 @@ class SystemOptionsTest(unittest.TestCase):
                 time.sleep(2)
                 st += 1
             else:
+                self.sysOption.click(self.sysOption.exButton_loc)
                 self.sysOption.switch_to_iframe(self.sysOption.iframe_loc)
                 time.sleep(1)
                 log.info('正确打开System Options页面')
@@ -87,71 +90,69 @@ class SystemOptionsTest(unittest.TestCase):
         return aun
 
     def checkOdoUnit(self, units):
-        self.maps = MapView(self.driver)
-        self.driver.refresh()
-        # Open Maps
-        try:
-            self.maps.click(self.maps.mapmenu_loc)
+        self.asset = masp(self.driver)
+        time.sleep(1)
+        try:  # 跳转到机器管理页
+            self.asset.click(self.asset.ManageAssetBtn_loc)
             self.driver.implicitly_wait(60)
         except:
-            log.info('地图菜单不可点击，刷新再试')
-            self.driver.refresh()
-            self.driver.implicitly_wait(60)
+            log.info('页面未加载完')
+            time.sleep(10)
+        else:
             time.sleep(5)
-            self.maps.click(self.maps.mapmenu_loc)
-            self.driver.implicitly_wait(60)
-        while True:
-            if self.maps.pageload():
-                time.sleep(1)
+            log.info('在机器管理页面验证设置结果')
+
+        try:   # 确定页面加载完成
+            self.asset.click(self.asset.ExButton_loc)
+            self.driver.implicitly_wait(30)
+        except:
+            time.sleep(3)
+        finally:
+            time.sleep(3)
+            self.asset.switch_to_iframe(self.asset.iframe)   # 跳转到机器管理页面
+        js = "document.querySelector('#machinelist .data-grid-body').scrollLeft = 1000"
+        self.driver.execute_script(js)
+        odo_column = self.driver.find_element_by_xpath('//*[@id="machinelist"]/div/table/tr/th[@data-key="Odometer"]')
+        odo_column.click()
+        while True:  # 判断是否为降序排序
+            sorts = self.driver.find_element_by_xpath(
+                '//*[@id="machinelist"]/div/table/tr/th[@data-key="Odometer"]/span').get_attribute("class")
+
+            if sorts == "arrow desc":
                 break
             else:
-                time.sleep(2)
-                log.info("页面未加载完，继续等待...")
+                # self.asset.click(self.asset.odo_column)
+                odo_column.click()
                 continue
-        time.sleep(2)
-        self.driver.implicitly_wait(60)
-        self.maps.click(self.maps.ExButton_loc)
-        time.sleep(1)
+
+        time.sleep(3)
         try:
-            self.maps.send_keys(self.maps.searchInbox_loc, "josh's")
-            self.maps.select_by_text(self.maps.selOnroad_loc, 'Onroad')
-            time.sleep(1)
-            self.maps.click(self.maps.searchButton_loc)
-            self.driver.implicitly_wait(60)
-            time.sleep(3)
+            self.asset.js_execute("document.getElementById('machinelist').scrollLeft=1000")
+            odo_loc = self.asset.get_text(self.asset.odos)
+            odounit = odo_loc[-2:]
+            log.info('机器里程数据为： %s' % odo_loc)
         except:
-            log.info('机器过滤及搜索操作失败')
+            log.info('未取到里程信息')
             return False
         else:
-            # 点击第一台机器
-            try:
-                self.maps.click(self.maps.firstAssetLink_loc)
-            except:
-                log.info('选择机器失败')
-                return False
-            else:
-                # 获取机器Odometer的单位
-                odo = self.maps.get_text(self.maps.odounit_loc)
-                odounit = odo[-2:]
-                log.info('地图上机器里程单位为： %s' % odounit)
-
-                if units == 'Mile':
-                    if odounit == 'mi':
-                        return True
-                    else:
-                        return False
+            if units == 'Mile':
+                if odounit == 'mi':
+                    return True
                 else:
-                    if odounit == 'km':
-                        return True
-                    else:
-                        return False
+                    return False
+            else:
+                if odounit == 'km':
+                    return True
+                else:
+                    return False
 
     def test01_odoUnit(self):
         '''测试系统设置Odo单位'''
         uns = self.setunitOdo()
-        time.sleep(10)
+        time.sleep(5)
         # restart = restartService()
         restart = ps()
+        time.sleep(5)
         if restart:
             re = self.checkOdoUnit(uns)
             if re:
@@ -165,7 +166,9 @@ class SystemOptionsTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        # cls.driver.execute_script('chrome.settingsPrivate.setDefaultZoom(1);')
         cls.driver.quit()
+
 
 if __name__ == '__main__':
     unittest.main()

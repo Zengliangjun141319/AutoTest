@@ -1,4 +1,4 @@
-from Common.operater import Operater
+from operater import Operater
 from time import sleep
 
 class ManageSchedulerPage(Operater):
@@ -21,8 +21,8 @@ class ManageSchedulerPage(Operater):
 
     # 添加scheduler页面的元素
     schedulerIframe_loc = ('id', 'iframescheduler') # scheduler添加页面
-    assetList_loc = ('xpath', '//*[@id="dialog_machine"]/div/div[1]') # Asset下拉列表
-    asset_loc = ('xpath','//*[@id="dropdowndiv"]/ul/li[1]') # 选择的Asset
+    assetList_loc = ('xpath', '//*[@id="dialog_machine"]/div/div[1]')  # Asset下拉列表
+    asset_loc = ('xpath', '//*[@id="dialog_machine"]/div/div[1]/label[2]')  # 选择Asset
     jobsite_loc = ('id', 'dialog_jobsite') # Jobsite
     beginDate_loc = ('id', 'dialog_begindate') # Begin Date
     endDate_loc = ('id', 'dialog_enddate') # End Date

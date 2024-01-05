@@ -1,17 +1,22 @@
 # -*- coding:utf8 -*-
-import logging,os
+import  logging,os
 from datetime import datetime
 
-#初始化日志保存的路径
-# log_path = "./report"
+
 class Log:
-    def __init__(self, log_path=None):
-        if log_path is None:
-            self.log_path = ".\\report"
-        else:
-            self.log_path = log_path
+    def __init__(self, log_name=None):
+        # 指定log保存位置
+        base_path = os.path.dirname(os.path.abspath(__file__))
+        fpath = os.path.abspath(os.path.join(base_path, '.\\'))
+        self.log_path = os.path.join(fpath, "report")
+        if not os.path.exists(self.log_path):
+            os.mkdir(self.log_path)
+
         # 文件的命名
-        self.logname = os.path.join(self.log_path, '%s.log' % datetime.now().strftime('%Y_%m_%d_%H_%M_%S'))
+        if log_name is None:
+            self.logname = os.path.join(self.log_path, '%s.log' % datetime.now().strftime('%Y_%m_%d_%H_%M_%S'))
+        else:
+            self.logname = os.path.join(self.log_path, '%s_%s.log' % (log_name, datetime.now().strftime('%Y_%m_%d_%H_%M_%S')))
         self.logger = logging.getLogger()
         self.logger.setLevel(logging.DEBUG)
         # 日志格式

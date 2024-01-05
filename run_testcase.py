@@ -1,9 +1,13 @@
 # -*- coding:utf8 -*-
 # 调用运行测试用例
 import unittest
-from Common.HTMLTestRunner import HTMLTestRunner
-from Common.sendemail import *
-from Common.queryMSSQL import commQuery
+from HTMLTestRunner import HTMLTestRunner
+from sendemail import *
+from queryMSSQL import commQuery
+from queryMSSQL import updateSQL
+from Common.updateResultToDB import getresult
+import sys
+
 
 def all_testcase():
     # 待执行测试用例的目录
@@ -18,6 +22,7 @@ def all_testcase():
     print(testcase)
     return testcase
 
+
 def checkver():
     # 检查IronIntel版本
     dt = 'ironintel'
@@ -26,11 +31,24 @@ def checkver():
     ver = vers[0][0]
     return ver
 
+
+def setTerm(val):
+    # 设置Terms
+    dt = 'ironintel'
+    sqls = "update TERMOFUSE set STATUS=%d" % val
+    updateSQL(dt=dt, sqlstr=sqls)
+    time.sleep(3)
+
+
 if __name__ == "__main__":
     path = ".\\report"
     isExists = os.path.exists(path)
     if not isExists:
         os.mkdir(path)
+
+    # 设置Terms为0
+    setTerm(0)
+
     nowtime = datetime.now().strftime("%Y.%m.%d.%H%M%S.%f")[:-3]
     rtime = datetime.now().strftime("%Y.%m.%d %H:%M")
     report_path = ".\\report\\result_%s" % nowtime
@@ -41,13 +59,15 @@ if __name__ == "__main__":
     # 运行用例
     runner.run(all_testcase())
     fp.close()
-
+    # 设置Terms为1
+    setTerm(1)
 
     # 发送邮件
     try:
         vers = checkver()
         # sendEmail(ver=vers, report=report_file, runtime=rtime)
-    except:
-        print("Email delivery report failed!!")
-    else:
+        # getresult(report_file,vers)
+    except Exception:
+        sys.stderr.write("Email delivery report failed!!")
+    finally:
         os.system('move .\\report\\*.* ' + report_path)

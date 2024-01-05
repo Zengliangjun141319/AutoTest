@@ -15,19 +15,20 @@ __author__ = 'ljzeng'
 
 import unittest
 from Page.SystemSettings.ManageRegions import ManageRegions
-from Common.operater import browser
+from operater import browser
 from Page.loginpage import LoginPage
-from Common.logger import Log
+from logger import Log
 import time
 
 log = Log()
 path = '.\\report'
 current_time = time.strftime("%Y%m%d%H%M%S", time.localtime(time.time()))
 
+
 class ManageRegionsTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        self.driver = browser()
+        self.driver = browser("chromeH")
         self.login = LoginPage(self.driver)
         self.login.login("atregion@iicon001.com", "Win.12345")
         self.driver.implicitly_wait(60)
@@ -87,8 +88,14 @@ class ManageRegionsTest(unittest.TestCase):
             if names.text == regiona:
                 l.find_element_by_xpath('./td/a[@title="Delete"]').click()
                 time.sleep(1)
-                self.manageregion.click(self.manageregion.delOK_loc)
-                time.sleep(3)
+                try:
+                    self.manageregion.click(self.manageregion.delOK_loc)
+                    time.sleep(3)
+                except:
+                    self.driver.switch_to.default_content()
+                    self.manageregion.click(self.manageregion.delOK_loc)
+                    self.manageregion.switch_to_iframe(self.manageregion.iframe_loc)
+                    time.sleep(3)
                 log.info('删除动作已执行，待验证结果')
                 return True
         else:
@@ -113,7 +120,6 @@ class ManageRegionsTest(unittest.TestCase):
         else:
             return False
 
-
     def test01_addRegion(self):
         '''测试新建Region'''
         self.createRegion()
@@ -123,7 +129,6 @@ class ManageRegionsTest(unittest.TestCase):
         else:
             log.info('添加Region失败')
         self.assertTrue(res)
-
 
     def test02_delregion(self):
         '''测试删除Region功能'''

@@ -4,13 +4,15 @@
    File Name：     Dispatch RequestsTest.py
    Description :   测试Dispatch Requests的Eamil、Print、删除、查看历史记录等功能
    Author :        姜丽丽
+   Change list:
+        1、 更改下拉框元素位置  ------ zlj  2023.8.8
 --------------------------------------------------------------------------
 """
 from Page.loginpage import LoginPage
 from Page.AssetSchdulingAndDispaching.DispatchRequestsPage import DispatchRequestsPage
-from Common.logger import Log
-from Common.operater import browser
-import pymssql
+from logger import Log
+from operater import browser
+import random
 import unittest
 import time
 import os
@@ -22,12 +24,13 @@ path = '.\\report'
 if not os.path.exists(path):
     os.mkdir(path)
 
+
 class DispatchRequestsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.driver = browser()
         cls.login = LoginPage(cls.driver)
-        cls.login.login('atdispatch@iicon006.com','Win.12345')
+        cls.login.login('atdispatch@iicon006.com', 'Win.12345')
         cls.driver.implicitly_wait(60)
         log.info('--------开始测试Dispatch Repuests--------')
         time.sleep(5)
@@ -43,9 +46,6 @@ class DispatchRequestsTest(unittest.TestCase):
         self.driver.implicitly_wait(60)
         time.sleep(5)
         try:
-            # self.dispatch.click(self.dispatch.dispatchmenu_loc)
-
-            # self.dispatch.click(self.dispatch.dispatchRequests_loc)
             ex = ('id', 'nav_arrow')
             log.info('-----收折左侧菜单')
             if not self.dispatch.is_clickable(ex):
@@ -107,7 +107,8 @@ class DispatchRequestsTest(unittest.TestCase):
                 try:
                     self.dispatch.click(self.dispatch.selectAssetList_loc)
                     time.sleep(1)
-                    self.dispatch.click(self.dispatch.firstAsset_loc)
+                    assets = ('xpath', '//*[@id="dialog_assignasset"]/div/div[2]/ul/li[%d]' % random.randint(1, 10))
+                    self.dispatch.click(assets)
                     time.sleep(1)
                     self.dispatch.click(self.dispatch.continueBtn_loc)
                     time.sleep(1)
@@ -118,7 +119,12 @@ class DispatchRequestsTest(unittest.TestCase):
                 else:
                     try:
                         self.dispatch.click(self.dispatch.sendEmailOKBtn_loc)
-                        self.dispatch.click(self.dispatch.sendEmailDialogOKBtn_loc)
+                        try:  # 页面代码元素位置调整
+                            self.dispatch.click(self.dispatch.sendEmailDialogOKBtn_loc)
+                        except:
+                            self.driver.switch_to.default_content()
+                            self.dispatch.click(self.dispatch.sendEmailDialogOKBtn_loc)
+                            self.dispatch.switch_to_iframe(self.dispatch.iframe_loc)
                     except:
                         log.info('--------Send Dispatch Request失败！--------')
                         return False
@@ -144,7 +150,8 @@ class DispatchRequestsTest(unittest.TestCase):
                 try:
                     self.dispatch.click(self.dispatch.selectAssetList_loc)
                     time.sleep(1)
-                    self.dispatch.click(self.dispatch.firstAsset_loc)
+                    selasset = ('xpath', '//*[@id="dialog_assignasset"]/div/div[2]/ul/li[%d]' % random.randint(1, 10))
+                    self.dispatch.click(selasset)
                     self.dispatch.click(self.dispatch.continueBtn_loc)
                 except:
                     log.info('--------打开Dispatch打印页面失败！--------')
@@ -181,7 +188,12 @@ class DispatchRequestsTest(unittest.TestCase):
                 return False
             else:
                 try:
-                    self.dispatch.click(self.dispatch.deleteDialogYesBtn_loc)
+                    try:  # element location changed
+                        self.dispatch.click(self.dispatch.deleteDialogYesBtn_loc)
+                    except:
+                        self.driver.switch_to.default_content()
+                        self.dispatch.click(self.dispatch.deleteDialogYesBtn_loc)
+                        self.dispatch.switch_to_iframe(self.dispatch.iframe_loc)
                 except:
                     log.info('--------删除Dispatch失败！--------')
                     return False

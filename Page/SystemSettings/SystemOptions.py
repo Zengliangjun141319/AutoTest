@@ -14,12 +14,15 @@
 __author__ = 'ljzeng'
 
 from operater import Operater
+from Page.comms import *
+
 
 class SystemOptions(Operater):
     # 系统设置页面元素
     # 左侧菜单
     settingsMenu_loc = ('id', 'button_menu')
     systemsettings_loc = ('id', 'lisyssetting')
+    exButton_loc = ('id', 'nav_arrow')
 
     sysOption_loc = ('xpath', '//*[@id="nav_systemoptions"]/a/span')
 
@@ -27,4 +30,4 @@ class SystemOptions(Operater):
     unitOdo_loc = ('id', 'txtOdoUnit')
 
     saveBtn = ('xpath', '//*[@id="content1"]/div[1]/div[@class="function_title"]/span[@class="sbutton iconsave"]')
-    SaveOK = ('xpath', '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-func"]/input[@value="OK"]')
+    SaveOK = ('xpath', ok_btn)

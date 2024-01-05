@@ -1,4 +1,4 @@
-from Common.operater import Operater
+from operater import Operater
 
 class CustomerPage(Operater):
     # 元素定位

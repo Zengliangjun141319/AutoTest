@@ -1,4 +1,4 @@
-from Common.operater import Operater
+from operater import Operater
 
 class AdminHomePage(Operater):
     # 定位器

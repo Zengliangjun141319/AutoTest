@@ -14,13 +14,13 @@
 __author__ = 'ljzeng'
 
 import unittest
-from Page.Inspection.InspectionLayoutPage import InspectionLayoutPage
+from Page.Inapection.InspectionLayoutPage import InspectionLayoutPage
 import time,os
 from datetime import datetime
-from Common.logger import Log
-from Common.operater import browser
+from logger import Log
+from operater import browser
 from Page.loginpage import LoginPage
-from Common.skiptest import skip_dependon
+from skiptest import skip_dependon
 
 log = Log()
 path = '.\\report'
@@ -38,10 +38,10 @@ class InspectLayoutTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
-        log.info('--------开始测试Inspection Layout设置--------')
-        self.driver = browser()
+        self.driver = browser("chromeH")
         self.login = LoginPage(self.driver)
         self.login.login('atInsLayout@iicon004.com', 'Win.12345')
+        log.info('--------开始测试Inspection Layout设置--------')
         self.driver.implicitly_wait(60)
         time.sleep(3)
         self.openLayout(self)
@@ -52,8 +52,19 @@ class InspectLayoutTest(unittest.TestCase):
 
     def openLayout(self):
         self.layout = InspectionLayoutPage(self.driver)
-        self.layout.click(self.layout.layoutsMu_loc)
         time.sleep(3)
+        while True:
+            try:
+                self.layout.click(self.layout.exButton_loc)
+                self.layout.click(self.layout.layoutsMu_loc)
+            except:
+                log.info('打开Layout失败，3秒后重试')
+                time.sleep(3)
+            else:
+                log.info('正确打开Layout')
+                time.sleep(3)
+                self.layout.click(self.layout.exButton_loc)
+                break
 
     def add_layout(self):
         try:
@@ -76,7 +87,7 @@ class InspectLayoutTest(unittest.TestCase):
             log.info('layout设置页面打开成功,开始输入信息')
             try:
                 self.layout.send_keys(self.layout.layoutNameinbox_loc, na)
-                self.layout.click(self.layout.includelogoCh_loc)
+                # self.layout.click(self.layout.includelogoCh_loc)    # 已取消
 
                 note = 'Add Layout at ' + self.time_format()
                 self.layout.send_keys(self.layout.notesInbox_loc, note)

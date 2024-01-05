@@ -5,12 +5,12 @@
 
 from Page.loginpage import LoginPage
 from Page.TeamIntelligence.GlobalSectionPage import GlobalSectionPage
-from Common.operater import browser
-from Common.logger import Log
+from operater import browser
+from logger import Log
 import unittest
 import os
 import time
-from Common.skiptest import skip_dependon
+from skiptest import skip_dependon
 
 log = Log()
 path = '.\\report'
@@ -21,15 +21,16 @@ if not os.path.exists(path):
 currenttime = time.strftime('%Y%m%d%H%M%S')
 gsname = 'GS' + currenttime
 
+
 class GlobalSectionTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.driver = browser()
-        log.info('------开始测试Team Global Section------')
         cls.login = LoginPage(cls.driver)
         cls.login.login("autotester@foresight.com", "1")
         cls.driver.implicitly_wait(60)
         time.sleep(3)
+        log.info('------开始测试Team Global Section------')
         cls.open_customer(cls)
         cls.open_globalsection(cls)
 
@@ -60,7 +61,6 @@ class GlobalSectionTest(unittest.TestCase):
             log.info("—————打开Global Section列表成功—————")
 
     def add_globalsection(self):
-
         try:
             self.gs.click(self.gs.addbutton_loc)
         except:
@@ -86,10 +86,10 @@ class GlobalSectionTest(unittest.TestCase):
         self.driver.implicitly_wait(60)
         lss = self.driver.find_elements_by_xpath('//*[@id="set_right"]/div/div[3]/div')
         for l in lss:
-            name = l.find_element_by_xpath('./div/div[@class="section-cell section-name"]/input').get_attribute('value')
+            name = l.find_element_by_xpath('./div/div/div[@class="section-cell section-name"]/input').get_attribute('value')
             if name == gsname:
                 l.find_element_by_xpath(
-                    './div/div[@class="section-cell section-func"]/em[@title="Delete Section"]').click()
+                    './div/div/div[@class="section-cell section-func"]/em[@title="Delete Section"]').click()
                 time.sleep(1)
                 self.driver.find_element_by_xpath(
                     '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-func"]/input[@value="Yes"]').click()
@@ -98,9 +98,8 @@ class GlobalSectionTest(unittest.TestCase):
         else:
             return False
 
-
-    def test01_globalsection(self):
-        '''测试新建Global Section'''
+    def test01_team_global_section(self):
+        """测试新建Global Section"""
         res = self.add_globalsection()
         if res:
             log.info('-----新增Global Section成功-----')
@@ -108,15 +107,16 @@ class GlobalSectionTest(unittest.TestCase):
             log.info('-----新增Global Section失败-----')
         self.assertTrue(res)
 
-    @skip_dependon(depend='test01_globalsection')
-    def test02_search(self):
-        '''测试搜索并删除'''
+    @skip_dependon(depend='test01_team_global_section')
+    def test02_search_team_global_section(self):
+        """测试搜索并删除"""
         res = self.search_del_gs()
         if res:
             log.info('删除Global Section成功')
         else:
             log.info('删除Global Section失败')
         self.assertTrue(res)
+
 
 if __name__ == '__main__':
     unittest.main()

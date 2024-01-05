@@ -5,20 +5,23 @@
    Description :   测试Draft类型Templates的添加、编辑、发布、复制、删除
    Author :        姜丽丽
 ------------------------------------------------------------------
+  Change List:
+    1、 34829-Inspection Package Import: Do not show source site/make uneditable. 调整元素位置
+            ------  曾良均  2023.6.19
 """
 from Page.loginpage import LoginPage
-from Page.Inspection.DraftTemplatesPage import DraftTemplatesPage
-from Common.logger import Log
-from Common.operater import browser
+from Page.Inapection.DraftTemplatesPage import DraftTemplatesPage
+from logger import Log
+from operater import browser
 import unittest
 import time
 import os
-from Common.skiptest import skip_dependon
+from skiptest import skip_dependon
 
 log = Log()
 path = '.\\report'
 
-#判断报告目录是否存在
+# 判断报告目录是否存在
 if not os.path.exists(path):
     os.mkdir(path)
 
@@ -29,12 +32,15 @@ copyTemplateName = editTemplateName+'Copy'
 
 
 class DrafTemplatesTest(unittest.TestCase):
+    login = None
+    driver = None
+
     @classmethod
     def setUpClass(cls) -> None:
-        log.info('--------开始测试Inspection Templates功能--------')
         cls.driver = browser()
         cls.login = LoginPage(cls.driver)
-        cls.login.login('atdraf@iicon006.com','Win.12345')
+        cls.login.login('atdraf@iicon006.com', 'Win.12345')
+        log.info('--------开始测试Inspection Templates功能--------')
         time.sleep(5)
         log.info('--------成功登录--------')
         cls.template = DraftTemplatesPage(cls.driver)
@@ -50,8 +56,10 @@ class DrafTemplatesTest(unittest.TestCase):
         try:
             log.info('打开Draft Templates页面')
             time.sleep(5)
+            self.template.click(self.template.exButton_loc)
             self.template.click(self.template.templates_loc)
             time.sleep(3)
+            self.template.click(self.template.exButton_loc)
             while not self.template.is_clickable(self.template.addBtn_loc):
                 log.info('添加Template按钮不能点击，等待3秒重试')
                 time.sleep(3)
@@ -97,7 +105,7 @@ class DrafTemplatesTest(unittest.TestCase):
                     try:
                         self.template.js_execute("document.getElementById('right_popup').scrollLeft=1000")
                         time.sleep(1)
-                        for i in range(0,5):
+                        for i in range(0, 5):
                             self.template.click(self.template.addQuestion_loc)
                             time.sleep(1)
                         self.template.js_execute("document.getElementById('right_popup').scrollLeft=0")
@@ -105,34 +113,34 @@ class DrafTemplatesTest(unittest.TestCase):
                         self.template.js_execute("document.getElementById('right_popup').scrollTop=1000")
                         time.sleep(1)
 
-                        #输入第1个问题
+                        # 输入第1个问题
                         self.template.inputTo(self.template.qustion1Name_loc, 'question1')
                         self.template.inputTo(self.template.qustion1Text_loc, 'test question1')
-                        self.template.select_by_index(self.template.qustion1Type_loc,0)
+                        self.template.select_by_index(self.template.qustion1Type_loc, 0)
                         time.sleep(1)
 
-                        #输入第2个问题
+                        # 输入第2个问题
                         self.template.inputTo(self.template.qustion2Name_loc, 'question2')
                         self.template.inputTo(self.template.qustion2Text_loc, 'test question2')
-                        self.template.select_by_index(self.template.qustion2Type_loc,6)
+                        self.template.select_by_index(self.template.qustion2Type_loc, 6)
                         time.sleep(1)
 
-                        #输入第3个问题
+                        # 输入第3个问题
                         self.template.inputTo(self.template.qustion3Name_loc, 'question3')
                         self.template.inputTo(self.template.qustion3Text_loc, 'test question3')
-                        self.template.select_by_index(self.template.qustion3Type_loc,7)
+                        self.template.select_by_index(self.template.qustion3Type_loc, 7)
                         time.sleep(1)
 
-                        #输入第4个问题
+                        # 输入第4个问题
                         self.template.inputTo(self.template.qustion4Name_loc, 'question4')
                         self.template.inputTo(self.template.qustion4Text_loc, 'test question4')
-                        self.template.select_by_index(self.template.qustion4Type_loc,15)
+                        self.template.select_by_index(self.template.qustion4Type_loc, 15)
                         time.sleep(1)
 
-                        #输入第5个问题
+                        # 输入第5个问题
                         self.template.inputTo(self.template.qustion5Name_loc, 'question5')
                         self.template.inputTo(self.template.qustion5Text_loc, 'test question5')
-                        self.template.select_by_index(self.template.qustion5Type_loc,18)
+                        self.template.select_by_index(self.template.qustion5Type_loc, 18)
                         time.sleep(1)
                     except:
                         log.info('--------添加了Questions失败！--------')
@@ -179,11 +187,11 @@ class DrafTemplatesTest(unittest.TestCase):
 
     def edit_template(self, templateName):
         res = self.search_template(templateName)
-        if res == True:
+        if res:
             try:
-                self.template.click(self.template.editBtn_loc)
-                self.driver.implicitly_wait(60)
                 time.sleep(2)
+                log.info('点击编辑按钮')
+                self.template.click(self.template.editBtn_loc)
             except:
                 log.info('-----打开Template编辑页面失败！----')
             else:
@@ -198,7 +206,7 @@ class DrafTemplatesTest(unittest.TestCase):
 
     def copy_template(self, templateName):
         res = self.search_template(templateName)
-        if res == True:
+        if res:
             try:
                 self.template.click(self.template.copyBtn_loc)
             except:
@@ -214,7 +222,7 @@ class DrafTemplatesTest(unittest.TestCase):
 
     def delete_template(self, templateName):
         res = self.search_template(templateName)
-        if res == True:
+        if res:
             try:
                 self.template.click(self.template.deleteBtn_loc)
             except:
@@ -229,7 +237,7 @@ class DrafTemplatesTest(unittest.TestCase):
 
     def publish_template(self, templateName):
         res = self.search_template(templateName)
-        if res == True:
+        if res:
             try:
                 self.template.click(self.template.publishBtn_loc)
             except:
@@ -245,6 +253,7 @@ class DrafTemplatesTest(unittest.TestCase):
     def ver_publish_and_del(self, templateName):
         try:
             # 点击 Published
+            self.template.click(self.template.exButton_loc)
             self.template.click(self.template.publish_menu_loc)
             time.sleep(3)
         except:
@@ -252,6 +261,7 @@ class DrafTemplatesTest(unittest.TestCase):
             return False
         else:
             # 搜索
+            self.template.click(self.template.exButton_loc)
             self.template.search(templateName)
             # //*[@id="set_right"]/div/div[3]/div[1]/div[2]/span
             try:
@@ -272,9 +282,8 @@ class DrafTemplatesTest(unittest.TestCase):
                     time.sleep(2)
                     return True
 
-
-    def test01_add_template(self):
-        '''添加Template'''
+    def test01_add_inspect_draft_template(self):
+        """添加Template"""
         self.add_template()
         res = self.verify_template(templateName)
         if res:
@@ -283,8 +292,8 @@ class DrafTemplatesTest(unittest.TestCase):
             log.info('-----添加Template失败！----')
         self.assertTrue(res)
 
-    def test02_edit_template(self):
-        '''编辑Template'''
+    def test02_edit_inspect_draft_template(self):
+        """编辑Template"""
         self.edit_template(templateName)
         res = self.verify_template(editTemplateName)
         if res:
@@ -293,9 +302,9 @@ class DrafTemplatesTest(unittest.TestCase):
             log.info('-----编辑Template失败！----')
         self.assertTrue(res)
 
-    @skip_dependon(depend='test02_edit_template')
-    def test03_copy_template(self):
-        '''复制Template'''
+    @skip_dependon(depend='test02_edit_inspect_draft_template')
+    def test03_copy_inspect_draft_template(self):
+        """复制Template"""
         self.copy_template(editTemplateName)
         res = self.verify_template(copyTemplateName)
         if res:
@@ -304,9 +313,9 @@ class DrafTemplatesTest(unittest.TestCase):
             log.info('-----拷贝Template失败！----')
         self.assertTrue(res)
 
-    @skip_dependon(depend='test03_copy_template')
-    def test04_delete_template(self):
-        '''删除Template'''
+    @skip_dependon(depend='test02_edit_inspect_draft_template')
+    def test04_delete_inspect_draft_template(self):
+        """删除Template"""
         self.delete_template(copyTemplateName)
         time.sleep(1)
         res = self.search_template(copyTemplateName)
@@ -316,9 +325,9 @@ class DrafTemplatesTest(unittest.TestCase):
             log.info('-----删除Template失败！----')
         self.assertFalse(res)
 
-    @skip_dependon(depend='test02_edit_template')
-    def test05_publish_template(self):
-        '''发布Template'''
+    @skip_dependon(depend='test02_edit_inspect_draft_template')
+    def test05_publish_inspect_draft_template(self):
+        """发布Template"""
         self.publish_template(editTemplateName)
         time.sleep(2)
         res = self.ver_publish_and_del(editTemplateName)
@@ -327,6 +336,7 @@ class DrafTemplatesTest(unittest.TestCase):
         else:
             log.info('-----发布Template失败！----')
         self.assertTrue(res)
+
 
 if __name__ == '__main__':
     unittest.main()

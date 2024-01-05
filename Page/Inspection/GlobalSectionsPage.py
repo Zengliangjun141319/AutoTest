@@ -1,4 +1,6 @@
-from Common.operater import Operater
+from operater import Operater
+from Page.comms import *
+
 
 class GlobalSectionsPage(Operater):
 
@@ -13,18 +15,16 @@ class GlobalSectionsPage(Operater):
     addBtn_loc = ('xpath', '//*[@id="set_right"]/div/div[1]/div[2]/span[1]')  # 添加按钮
 
     # 添加页面的元素
-    name_loc = ('xpath', '//*[@id="right_popup"]/div/div[2]/div/table/tbody/tr[1]/td[2]/input') # Name
-    displayText_loc = ('xpath', '//*[@id="right_popup"]/div/div[2]/div/table/tbody/tr[2]/td[2]/input') # Display Text
-    notes = ('id','dialog_notes') # Notes
+    name_loc = ('xpath', '//*[@id="right_popup"]/div/div[2]/div/table/tr[1]/td[2]/input')  # Name
+    displayText_loc = ('xpath', '//*[@id="right_popup"]/div/div[2]/div/table/tr[2]/td[2]/input')  # Display Text
+    notes = ('id', 'dialog_notes')  # Notes
 
     saveBtn_loc = ('xpath', '//*[@id="right_popup"]/div/div[1]/div/span[1]')   # save
     saveAndExitBtn_loc = ('xpath', '//*[@id="right_popup"]/div/div[1]/div/span[2]')  # save and Exit
     exitWithoutSavingBtn_loc = ('xpath', '//*[@id="right_popup"]/div/div[1]/div/span[3]')  # exit without saving
 
-    saveMessage_loc = ('xpath', '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-content"]/div')    # 保存提示对话框
-    okBtn_loc = ('xpath', '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-func"]/input')  # 提示对话框上的‘OK’按钮
-
-
+    saveMessage_loc = ('xpath', msg_content)    # 保存提示对话框
+    okBtn_loc = ('xpath', ok_btn)  # 提示对话框上的‘OK’按钮
 
     def inputTo(self, Inboxloc, text):
         self.send_keys(Inboxloc, text)

@@ -1,13 +1,14 @@
 # coding:utf-8
 
 import os
-from Common.operater import browser
-from Common.logger import Log
+from operater import browser
+from logger import Log
 from TestCase.ManageCurfew.curfew_pub import curfew_IronSite
 import unittest
-from Common.skiptest import skip_dependon
+from skiptest import skip_dependon
 from Page.loginpage import LoginPage
 import time
+from queryMSSQL import delSQL
 
 log = Log()
 path = ".\\report"
@@ -15,14 +16,19 @@ path = ".\\report"
 if not os.path.exists(path):
     os.mkdir(path)
 
+
 class CurfewConfigTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.driver = browser()
+        cls.driver = browser("chromeH")
         cls.loginer = LoginPage(cls.driver)
         cls.loginer.login("atcurfew@iicon004.com", "Win.12345")
         cls.driver.implicitly_wait(35)
         log.info('-----开始测试Curfew相关功能')
+        # 初始化
+        dt = 'FORESIGHT_FLV_IICON004'
+        querystr = "delete from CURFEW where TITLE='Plan100'"
+        delSQL(dt=dt, sqlstr=querystr)
         time.sleep(10)
 
     @classmethod
@@ -52,7 +58,6 @@ class CurfewConfigTest(unittest.TestCase):
             log.info('搜索Curfew测试失败')
         self.assertTrue(res)
 
-
     # 如果新增Curfew失败，则跳过删除Curfew测试
     @skip_dependon(depend='test01_addcurfew')
     def test03_delCurfew(self):
@@ -64,6 +69,7 @@ class CurfewConfigTest(unittest.TestCase):
         else:
             log.info('删除Curfew失败')
         self.assertFalse(res)
+
 
 if __name__ == '__main__':
     unittest.main()

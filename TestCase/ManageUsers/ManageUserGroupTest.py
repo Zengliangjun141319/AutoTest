@@ -2,12 +2,12 @@
 
 from Page.ManageUsers.ManageUserGroupPage import ManageUserGroupPage
 from Page.loginpage import LoginPage
-from Common.operater import browser
+from operater import browser
 import unittest
 import os
-from Common.logger import Log
+from logger import Log
 import time
-from Common.skiptest import skip_dependon
+from skiptest import skip_dependon
 
 log = Log()
 path = ".\\report"
@@ -21,7 +21,7 @@ class ManageUserGroupTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.driver = browser()
+        cls.driver = browser("chromeH")
         cls.login = LoginPage(cls.driver)
         log.info('--------开始测试用户组管理--------')
         cls.login.login("atusergroup@iicon004.com", "Win.12345")

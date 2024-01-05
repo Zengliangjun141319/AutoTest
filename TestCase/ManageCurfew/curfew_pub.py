@@ -3,10 +3,11 @@
 import time
 from selenium.webdriver.support.select import Select
 import sys
+from Page.comms import *
+
 
 class curfew_IronSite():
     """curfew信息封装"""
-
     def __init__(self, driver):
         """初始化driver"""
         self.driver = driver
@@ -16,7 +17,7 @@ class curfew_IronSite():
         self.driver.find_element_by_id("searchinputtxt").clear()
         time.sleep(1)
         self.driver.find_element_by_id("searchinputtxt").send_keys("Plan100")
-        self.driver.find_element_by_xpath(".//*[@id='content1']/div/div[2]/input[2]").click()
+        self.driver.find_element_by_xpath(".//*[@id='content1']/div/div[2]/input[@value='Search']").click()
 
         # self.driver.exceute_script("window.scrollTo(0,300)")
         time.sleep(2)
@@ -27,7 +28,16 @@ class curfew_IronSite():
         else:
             self.driver.find_element_by_xpath(".//*[@id='curfewlist']/div/div/div/table/tbody/tr[1]/td[5]").click()
             time.sleep(2)
-            self.driver.find_element_by_xpath("html/body/div[2]/div[3]/input[2]").click()
+            try:
+                del_yes = '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-func"]/input[@value="Yes"]'
+                self.driver.find_element_by_xpath(del_yes).click()
+            except:
+                self.driver.switch_to.default_content()
+                del_yes = '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-func"]/input[@value="Yes"]'
+                self.driver.find_element_by_xpath(del_yes).click()
+                iframe = self.driver.find_element_by_xpath(".//*[@id='set_right']/iframe")
+                self.driver.switch_to.frame(iframe)
+
             time.sleep(1)
 
 
@@ -77,7 +87,7 @@ class curfew_IronSite():
         self.driver.find_element_by_id("searchinputtxt").clear()
         self.driver.find_element_by_id("searchinputtxt").send_keys("Plan100")
         time.sleep(2)
-        self.driver.find_element_by_xpath(".//*[@id='content1']/div/div[2]/input[2]").click()
+        self.driver.find_element_by_xpath(".//*[@id='content1']/div/div[2]/input[@value='Search']").click()
         time.sleep(2)
         try:
             self.driver.find_element_by_xpath(".//*[@id='curfewlist']/div/div/div/table/tbody/tr")

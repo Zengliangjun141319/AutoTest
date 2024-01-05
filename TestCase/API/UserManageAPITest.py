@@ -16,13 +16,13 @@ __author__ = 'ljzeng'
 import unittest
 import requests
 from urllib import parse
-from Common.excel import excel
+from excel import excel
 import ddt
-from Common.logger import Log
+from logger import Log
 import os
-import time
-from Common.loginsapi import login
-from Common.queryMSSQL import *
+import urllib3
+from loginsapi import login
+from queryMSSQL import *
 
 log = Log()
 path = ".\\report"
@@ -32,9 +32,10 @@ if not isExists:
 
 loginuser = 'admin@iicon001.com'
 s = requests.session()
-global iiabc,sites,useriid,appname
+global iiabc, sites, useriid, appname
 file_path = "TestData\\api-userdata.xls"
 testData = excel.get_list(file_path)
+
 
 @ddt.ddt
 class UserManageAPITest(unittest.TestCase):
@@ -45,28 +46,26 @@ class UserManageAPITest(unittest.TestCase):
         init = login(s, loginuser=loginuser)
         if init:
             iiabc = init[1]
-            sites = init[2][:45]
+            sites = init[2][:46]  # HTTP为到45，HTTPS为46
             appname = sites[31:]
         else:
             exit()
-
 
     @classmethod
     def tearDownClass(cls) -> None:
         pass
 
-
     @ddt.data(*testData)
     def test01_adduser(self, data):
         log.info("测试： %s" % data["casename"])
-        global iiabc,sites,useriid
+        global iiabc, sites, useriid
         adduserurl = sites + '/Security/AddUser.aspx'
         addheaders = {
-            'Accept':'application/json, text/javascript, */*; q=0.01',
-            'X-Requested-With':'XMLHttpRequest',
-            'Cookie': 'ir_lusname_=%s; iiabc_lang=en-us; iiabc_=%s; basemap=topo;' %(loginuser,iiabc),
+            'Accept': 'application/json, text/javascript, */*; q=0.01',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Cookie': 'ir_lusname_=%s; iiabc_lang=en-us; iiabc_=%s; basemap=topo;' % (loginuser, iiabc),
             'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'user-Agent':'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36'
+            'user-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36'
         }
 
         id = data["userid"]
@@ -77,7 +76,8 @@ class UserManageAPITest(unittest.TestCase):
         datas = 'MethodID=-1&MethodName=AddUser&ClientData=' + parse.quote(ClientData)    # 对参数内容进行URL编码
 
         time.sleep(1)
-        adduserRes = s.post(url=adduserurl, headers=addheaders, data=datas)
+        urllib3.disable_warnings()
+        adduserRes = s.post(url=adduserurl, headers=addheaders, data=datas, verify=False) # verify=False为不验证HTTPS的SSL
 
         try:
             mess = adduserRes.text.split('","')[1]
@@ -94,9 +94,8 @@ class UserManageAPITest(unittest.TestCase):
         # print(mess)
         self.assertEqual(mess, data["mess"], "实际：%s, 预期：%s" % (mess, data["mess"]))
 
-
     def test02_getuserlist(self):
-        global iiabc,sites,useriid
+        global iiabc, sites, useriid
         log.info("测试： 检查用户列表")
 
         # 查看用户列表
@@ -109,16 +108,17 @@ class UserManageAPITest(unittest.TestCase):
         }
 
         usermanurl = sites + '/Security/UserManage.aspx'
-        getuserres = s.post(url=usermanurl, headers=headers, data='MethodID=-1&MethodName=GetUsers&ClientData=')
+        # 获取用户列表的接口更新，增加了一组参数
+        urllib3.disable_warnings()
+        getuserres = s.post(url=usermanurl, headers=headers, verify=False, data='MethodID=-1&MethodName=GetUsers&ClientData=%5B%221%22%2C%22%22%5D')
 
         # assertIn(self, member, container,msg=None)
         self.assertIn(useriid, getuserres.text)
 
-
     def test03_edituser(self):
-        global iiabc,sites,useriid
-        log.info("测试： 编辑用户为 %s" %useriid)
-        url = sites + 'Security/AddUser.aspx'
+        global iiabc, sites, useriid
+        log.info("测试： 编辑用户为 %s" % useriid)
+        url = sites + '/Security/AddUser.aspx'
         headers = {
             'Accept': 'application/json, text/javascript, */*; q=0.01',
             'X-Requested-With': 'XMLHttpRequest',
@@ -131,7 +131,9 @@ class UserManageAPITest(unittest.TestCase):
         datas = 'MethodID=-1&MethodName=EditUser&ClientData=' + parse.quote(ClientData)  # 对参数内容进行URL编码
         time.sleep(1)
 
-        editres = s.post(url=url, headers=headers, data=datas)
+        log.info("Edit user url is: %s" % url)
+        urllib3.disable_warnings()   # 取消连接警告
+        editres = s.post(url=url, headers=headers, data=datas, verify=False)
 
         try:
             mess = editres.text.split('","')[1]
@@ -142,11 +144,10 @@ class UserManageAPITest(unittest.TestCase):
 
         self.assertEqual(mess, 'Saved successfully.', "实际：%s, 预期：Saved successfully." % mess)
 
-
     def test04_deluser(self):
-        global iiabc,sites,useriid
+        global iiabc, sites, useriid
         log.info("测试： 删除用户 %s" % useriid)
-        url = sites + 'Security/UserManage.aspx'
+        url = sites + '/Security/UserManage.aspx'
         headers = {
             'Accept': 'application/json, text/javascript, */*; q=0.01',
             'X-Requested-With': 'XMLHttpRequest',
@@ -156,8 +157,8 @@ class UserManageAPITest(unittest.TestCase):
         }
 
         datas = 'MethodID=-1&MethodName=DeleteUser&ClientData=' + useriid
-
-        delres = s.post(url=url, headers=headers, data=datas)
+        urllib3.disable_warnings()
+        delres = s.post(url=url, headers=headers, data=datas, verify=False)
 
         mess = delres.text[1:-1]
         self.assertEqual(mess, 'OK', "实际：%s, 预期：OK" % mess)

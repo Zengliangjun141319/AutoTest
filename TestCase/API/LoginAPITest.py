@@ -15,14 +15,15 @@ __author__ = 'ljzeng'
 
 import unittest
 import requests
-from urllib import parse
-from Common.excel import excel
+import urllib3
+from excel import excel
 import ddt
-from Common.logger import Log
+from logger import Log
 import os
 import time
+import json
 
-url = 'http://iron.soft.rz/login/Login.aspx?tp=dologin'
+url = 'https://iron.soft.rz/login/Login.aspx?tp=dologin'
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -33,6 +34,7 @@ path = ".\\report"
 isExists = os.path.exists(path)
 if not isExists:
     os.mkdir(path)
+
 
 @ddt.ddt
 class LoginAPITest(unittest.TestCase):
@@ -58,21 +60,21 @@ class LoginAPITest(unittest.TestCase):
         paydata = ss.encode('utf8')
 
         time.sleep(1)
-        resut = requests.post(url=url, headers=headers, data=paydata)
+        urllib3.disable_warnings()
+        resut = requests.post(url=url, headers=headers, data=paydata, verify=False)
 
-        ms = []
-        for a in resut.text.split(','):
-            ms += [a]
-
-        message = ms[1].split(':')[1]
-        message = message[1:-1]
+        # 方法1
+        temps = json.loads(resut.text)  # 把文本内容转为字典格式，方便取值
+        message = temps["ErrorMessage"]
+        # print(message)
 
         ts = (message == data["mess"])
-        if self.assertEqual(message, data["mess"], "ts is %s, expect is %s" %(message, data["mess"])):
-            log.info("用例 %s 测试失败" %data["casename"])
+        if self.assertEqual(message, data["mess"], "ts is %s, expect is %s" % (message, data["mess"])):
+            log.info("用例 %s 测试失败" % data["casename"])
         else:
-            log.info("用例 %s 测试成功" %data["casename"])
+            log.info("用例 %s 测试成功" % data["casename"])
             log.info("")
+
 
 if __name__ == '__main__':
     unittest.main()

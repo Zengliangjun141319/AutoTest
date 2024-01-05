@@ -6,10 +6,11 @@ import unittest
 import os
 from Page.TruckAlertConfigPage import TruckAlertPage
 import time
-from Common.logger import Log
-from Common.excel import excel
+from logger import Log
+from excel import excel
 import ddt
-from Common.skiptest import skip_dependon
+from skiptest import skip_dependon
+import random
 
 log = Log()
 # 判断保存报告的目录是否存在
@@ -26,11 +27,11 @@ nowtime = time.strftime('%Y%m%d%H%M%S')
 class TruckAlertTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.driver = browser()
+        cls.driver = browser("chromeH")
         cls.login = LoginPage(cls.driver)
         cls.login.login('attruck@iicon004.com', 'Win.12345')
         cls.truckalert = TruckAlertPage(cls.driver)
-        cls.driver.implicitly_wait(60)
+        cls.driver.implicitly_wait(5)
         time.sleep(5)
         log.info('开始测试TruckAlert管理...')
 
@@ -67,7 +68,12 @@ class TruckAlertTest(unittest.TestCase):
         self.truckalert.send_keys(self.truckalert.mintrucks_loc, data['minnum'])
         self.truckalert.send_keys(self.truckalert.maxtrucks_loc, data['maxnum'])
         self.truckalert.click(self.truckalert.assettype_loc)
-        self.truckalert.click(self.truckalert.typeselect_loc)
+        time.sleep(1)
+        check1 = ('xpath', '//*[@id="dialog_assettype"]/div/div[2]/ul/li[%d]/input' % random.randint(1, 4))
+        check2 = ('xpath', '//*[@id="dialog_assettype"]/div/div[2]/ul/li[%d]/input' % random.randint(5, 9))
+        self.truckalert.click(check1)
+        self.truckalert.click(check2)
+        time.sleep(1)
         self.truckalert.send_keys(self.truckalert.notes_loc, "The content of notes created on " + nowtime)
         self.truckalert.click(self.truckalert.savebutton_loc)
         time.sleep(3)
@@ -138,7 +144,7 @@ class TruckAlertTest(unittest.TestCase):
             log.info('删除成功')
             return True
 
-    def test02_search(self):
+    def test02_search_truck(self):
         '''测试搜索并指派联系人'''
         res = self.search_config_and_subscribe()
         if res:
@@ -147,8 +153,8 @@ class TruckAlertTest(unittest.TestCase):
             log.info('指派联系人失败')
         self.assertTrue(res)
 
-    @skip_dependon(depend='test02_search')
-    def test03_del(self):
+    @skip_dependon(depend='test02_search_truck')
+    def test03_del_truck(self):
         '''删除配置'''
         res = self.del_config()
         if res:
@@ -156,6 +162,7 @@ class TruckAlertTest(unittest.TestCase):
         else:
             log.info('删除Trucking Alerts Configure失败')
         self.assertTrue(res)
+
 
 if __name__ == "__main__":
     unittest.main()

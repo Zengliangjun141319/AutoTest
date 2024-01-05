@@ -4,12 +4,15 @@
    File Name：    AlertsManagementTest.py
    Description :   测试AlertsManagement的Aacknowledge Alert、Create Work Order、查看Asset View列表、查看Aacknowledged Alerts列表
    Author :        姜丽丽
+
+   Change Log:
+        1、 新建WO保存时增加弹出提示
 -------------------------------------------------------------------------------------------------------------------------
 """
 from Page.loginpage import LoginPage
 from Page.AssetHealth.AlertsManagementPage import AlertsManagementPage
-from Common.logger import Log
-from Common.operater import browser
+from logger import Log
+from operater import browser
 import unittest
 import time
 import os
@@ -17,20 +20,26 @@ import os
 log = Log()
 path = '.\\report'
 
-#判断报告目录是否存在
+# 判断报告目录是否存在
 if not os.path.exists(path):
     os.mkdir(path)
 
 # current_time = time.strftime('%H%M%S')
 # planName = 'AutoTest'+current_time
 
+
+# noinspection PyTypeChecker
 class AlertsManagementTest(unittest.TestCase):
+    login = None
+    driver = None
+
     @classmethod
     def setUpClass(cls) -> None:
-        log.info('--------开始测试MAlerts Management--------')
         cls.driver = browser()
         cls.login = LoginPage(cls.driver)
-        cls.login.login('atalert@iicon006.com','Win.12345')
+        cls.login.login('atalert@iicon004.com', 'Win.12345')
+        log.info('--------开始测试Alerts Management--------')
+        cls.driver.implicitly_wait(60)
         log.info('--------成功登录--------')
         cls.to_frame(cls)
 
@@ -43,15 +52,7 @@ class AlertsManagementTest(unittest.TestCase):
         self.driver.implicitly_wait(60)
         time.sleep(5)
         self.alert.switch_to_iframe(self.alert.iframe_loc)
-        # try:
-        #     self.alert.click(self.alert.assetHealth_loc)
-        #     time.sleep(5)
-        #     self.alert.click(self.alert.alertsManagement_loc)
-        #     self.alert.switch_to_iframe(self.alert.iframe_loc)
-        # except:
-        #     log.info('--------打开Alerts Management列表失败！--------')
-        # else:
-        #     log.info('--------打开Alerts Management列表成功！--------')
+        time.sleep(3)
 
     def is_have_records(self):
         try:
@@ -59,30 +60,25 @@ class AlertsManagementTest(unittest.TestCase):
             self.alert.clear(self.alert.beginDate_loc)
             time.sleep(1)
             self.alert.click(self.alert.searchBtn_loc)
-            # n = 0
-            # while n < 3:
-            #     time.sleep(5)
-            #     n += 1
-            #     lss = ('xpath', '//*[@id="alertviewlist"]/div/div[1]/div/table/tbody')
-            #     if self.alert.is_visibility(lss):
-            #         log.info('第 %d 次已加载出数据' % n)
-            #         break
+            time.sleep(3)
+
+            # 增加按WO ID升序排序
             while True:
-                if self.alert.pageload():
+                try:
+                    self.alert.click(self.alert.woid_loc)
                     time.sleep(1)
+                    log.info('已升序显示')
                     break
-                else:
-                    time.sleep(2)
-                    log.info("页面未加载完，继续等待...")
-                    continue
+                except:
+                    log.info('排序操作失败，等待3秒重试')
+                    time.sleep(3)
 
             table = self.driver.find_element_by_class_name('data-grid-body-content')
-            table.find_elements_by_tag_name('tr')
         except:
             log.info('--------Alerts Management列表中无记录！--------')
             return False
         else:
-            elements = table.find_elements_by_tag_name('input')
+            elements = table.find_elements_by_tag_name('label')  # 元素位置更新
             for element in elements:
                 at = element.get_attribute('style')
                 if not at:
@@ -93,7 +89,7 @@ class AlertsManagementTest(unittest.TestCase):
 
     def acknowledge_alert(self):
         res = self.is_have_records()
-        if res == True :
+        if res:
             try:
                 time.sleep(1)
                 self.alert.click(self.alert.acknowledgeAlertBtn_loc)
@@ -113,7 +109,6 @@ class AlertsManagementTest(unittest.TestCase):
                     return True
         else:
             return False
-
 
     def create_work_order(self):
         time.sleep(3)
@@ -150,9 +145,19 @@ class AlertsManagementTest(unittest.TestCase):
                     return False
                 else:
                     try:
-                        self.alert.send_keys(self.alert.workOrderDescription_loc,'AutoTest')
+                        time.sleep(2)
+                        # self.alert.click(self.alert.desc_not_empty_ok_loc)
+                        # time.sleep(1)
+                        self.alert.send_keys(self.alert.workOrderDescription_loc, 'AutoTest')
                         self.alert.click(self.alert.saveBtn_loc)
+                        # self.alert.click(self.alert.skip_loc)
+                        time.sleep(1)
+                        # 729版本增加弹出提示
+                        self.alert.click(self.alert.saveStatusChange_loc)
+                        time.sleep(1)
+
                         times = 1
+                        msg = None
                         while times <= 3:
                             try:
                                 msg = self.alert.get_text(self.alert.saveDialog_loc)
@@ -230,7 +235,6 @@ class AlertsManagementTest(unittest.TestCase):
                 log.info('--------打开Acknowledged Alers列表成功！--------')
                 return True
 
-
     def test01_acknowledge_alert(self):
         res = self.acknowledge_alert()
         self.assertTrue(res)
@@ -246,7 +250,6 @@ class AlertsManagementTest(unittest.TestCase):
     def test04_create_work_order(self):
         res = self.create_work_order()
         self.assertTrue(res)
-
 
 
 if __name__ == '__main__':

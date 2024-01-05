@@ -1,13 +1,13 @@
-from Common.operater import browser
+from operater import browser
 from time import sleep
-from Common.logger import Log
+from logger import Log
 import os,time
 import unittest
 from Page.AdminSite.AdminHomePage import AdminHomePage
 from Page.AdminSite.CustomerPage import CustomerPage
 from Page.AdminSite.Con004DetailPage import Con004DetailPage as C4
 from Page.loginpage import LoginPage as LG
-from Common.queryMSSQL import *
+from queryMSSQL import *
 
 log = Log()
 # 判断保存报告的目录是否存在

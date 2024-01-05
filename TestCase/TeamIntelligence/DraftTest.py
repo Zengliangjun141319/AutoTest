@@ -4,10 +4,10 @@ from Page.loginpage import LoginPage
 from Page.TeamIntelligence.DraftPage import DraftPage
 import os
 import time
-from Common.operater import browser
+from operater import browser
 import unittest
-from Common.logger import Log
-from Common.skiptest import skip_dependon
+from logger import Log
+from skiptest import skip_dependon
 
 current_time = time.strftime('%Y%m%d%H%M', time.localtime(time.time()))
 templateName = 'AutoTest'+current_time
@@ -17,10 +17,9 @@ copyTemplateName = editTemplateName+'Copy'
 log = Log()
 
 path = '.\\report'
-
-
 if not os.path.exists(path):
     os.mkdir(path)
+
 
 class DraftTest(unittest.TestCase):
     @classmethod
@@ -53,13 +52,15 @@ class DraftTest(unittest.TestCase):
         try:
             self.draft.click(self.draft.fullmenu_loc)
             self.draft.click(self.draft.teamintel_loc)
+            self.draft.click(self.draft.exButton_loc)
             time.sleep(3)
             self.draft.click(self.draft.draftmenu_loc)
         except:
             log.info("—————打开Draft Templates列表失败—————")
         else:
+            self.draft.click(self.draft.exButton_loc)
+            time.sleep(3)
             log.info("—————打开Draft Templates列表成功—————")
-
 
     def add_drafttemplate(self):
         currenttime = time.strftime('%Y%m%d%H%M%S')
@@ -121,7 +122,6 @@ class DraftTest(unittest.TestCase):
                         self.draft.click(self.draft.saveexit_loc)
                         time.sleep(3)
 
-
     def search_template(self, templateName):
         # 查询目标template是否存在
         time.sleep(1)
@@ -133,7 +133,6 @@ class DraftTest(unittest.TestCase):
             return False
         else:
             return True
-
 
     def verify_template(self, templateName):
         # 查询刚才创建的template是否存在
@@ -213,8 +212,12 @@ class DraftTest(unittest.TestCase):
 
     def verify_publish(self, templatename):
         publish = ('xpath', '//*[@id="set_left"]/ul/li[@title="Published"]')
+        coll = self.driver.find_element_by_xpath('//*[@id="nav_arrow"]/div').get_attribute("class")
+        if coll == 'icn collapse':
+            self.draft.click(self.draft.exButton_loc)
         self.draft.click(publish)
         time.sleep(3)
+        self.draft.click(self.draft.exButton_loc)
         self.draft.search(templatename)
         time.sleep(2)
         try:
@@ -224,9 +227,8 @@ class DraftTest(unittest.TestCase):
         else:
             return True
 
-
-    def test01_add_template(self):
-        '''新建Template'''
+    def test01_add_team_draft_template(self):
+        """新建Template"""
         self.add_drafttemplate()
         res = self.verify_template(templateName)
         if res:
@@ -235,9 +237,9 @@ class DraftTest(unittest.TestCase):
             log.info('-----添加Template失败！----')
         self.assertTrue(res)
 
-    @skip_dependon(depend='test01_add_template')
-    def test02_edit_template(self):
-        '''编辑Template'''
+    @skip_dependon(depend='test01_add_team_draft_template')
+    def test02_edit_team_draft_template(self):
+        """编辑Template"""
         self.edit_template(templateName)
         res = self.verify_template(editTemplateName)
         if res:
@@ -246,9 +248,9 @@ class DraftTest(unittest.TestCase):
             log.info('-----编辑Template失败！----')
         self.assertTrue(res)
 
-    @skip_dependon(depend='test02_edit_template')
-    def test03_copy_template(self):
-        '''复制编辑的Template'''
+    @skip_dependon(depend='test02_edit_team_draft_template')
+    def test03_copy_team_draft_template(self):
+        """复制编辑的Template"""
         self.copy_template(editTemplateName)
         res = self.verify_template(copyTemplateName)
         if res:
@@ -257,9 +259,9 @@ class DraftTest(unittest.TestCase):
             log.info('-----拷贝Template失败！----')
         self.assertTrue(res)
 
-    @skip_dependon(depend='test03_copy_template')
-    def test04_delete_template(self):
-        '''删除复制的Template'''
+    @skip_dependon(depend='test03_copy_team_draft_template')
+    def test04_delete_team_draft_template(self):
+        """删除复制的Template"""
         self.delete_template(copyTemplateName)
         res = self.search_template(copyTemplateName)
         if not res:
@@ -268,16 +270,20 @@ class DraftTest(unittest.TestCase):
             log.info('-----删除Template失败！----')
         self.assertFalse(res)
 
-    @skip_dependon(depend='test02_edit_template')
-    def test05_publish_template(self):
-        '''发布编辑后的Template'''
+    @skip_dependon(depend='test02_edit_team_draft_template')
+    def test05_publish_team_draft_template(self):
+        """发布编辑后的Template"""
         self.publish_template(editTemplateName)
         res = self.verify_publish(editTemplateName)
+        # 清除数据
+        self.delete_template(editTemplateName)
+        time.sleep(2)
         if res:
             log.info('-----发布Template成功！----')
         else:
             log.info('-----发布Template失败！----')
         self.assertTrue(res)
+
 
 if __name__ == '__main__':
     unittest.main()

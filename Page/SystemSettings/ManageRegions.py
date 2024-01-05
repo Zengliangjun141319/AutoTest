@@ -16,7 +16,9 @@
 """
 __author__ = 'ljzeng'
 
-from Common.operater import Operater
+from operater import Operater
+from Page.comms import *
+
 
 class ManageRegions(Operater):
     # 定义元素位置
@@ -45,13 +47,12 @@ class ManageRegions(Operater):
     cancelBtn = ('xpath', '//*[@id="dialog_region"]/div[@class="dialog-func"]/input[@value="Cancel"]')
 
     # 添加不符合时弹出窗口
-    tipmessage_loc = ('xpath', '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-content"]/div')
-    tipOK_loc = ('xpath', '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-func"]/input')
-
+    tipmessage_loc = ('xpath', msg_content)
+    tipOK_loc = ('xpath', ok_btn)
 
     # 列表功能按钮
     result1Edit_loc = ('xpath', '//*[@id="regionlist"]/div/div[1]/div/table/tbody/tr/td[6]/a')
     result1Del_loc = ('xpath', '//*[@id="regionlist"]/div/div[1]/div/table/tbody/tr/td[7]/a')
 
     # 删除提示
-    delOK_loc = ('xpath', '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-func"]/input[@value="Yes"]')
+    delOK_loc = ('xpath', yes_btn)

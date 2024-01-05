@@ -6,14 +6,14 @@
    Author :        姜丽丽
 -------------------------------------------------
 """
-from Common.operater import browser
+from operater import browser
 from Page.ManageAssets.ManageRentalsPage import ManageRentalsPage
 from Page.loginpage import LoginPage
-from Common.logger import Log
+from logger import Log
 import unittest
 import time
 import os
-from Common.skiptest import skip_dependon
+from skiptest import skip_dependon
 
 log = Log()
 # 判断报告目录是否存在
@@ -26,14 +26,15 @@ current_date = time.strftime('%m/%d/%Y')
 vendor = 'AutoTest' + current_time
 editVendor = vendor+'Edit'
 
+
 class ManageRentalsTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        log.info('----开始测试租赁管理----')
-        cls.driver = browser()
+        cls.driver = browser("chromeH")
         cls.login = LoginPage(cls.driver)
-        cls.login.login('atrental@iicon006.com','Win.12345')
+        cls.login.login('atrental@iicon006.com', 'Win.12345')
+        log.info('----开始测试租赁管理----')
         cls.to_frame(cls)
 
     @classmethod
@@ -72,7 +73,9 @@ class ManageRentalsTest(unittest.TestCase):
         else:
             log.info('--------打开添加租赁页面成功！开始输入信息--------')
             time.sleep(5)
-            self.rental.select_by_index(self.rental.assetSelect_loc,1)
+            import random
+            num = random.randint(1, 5)
+            self.rental.select_by_index(self.rental.assetSelect_loc, num)
             self.asset = self.rental.get_text(self.rental.assetSelectOption_loc)
             self.rental.select_by_index(self.rental.outsideSelect_loc,1)
             self.rental.send_keys(self.rental.vendor_loc, vendor)
@@ -137,10 +140,17 @@ class ManageRentalsTest(unittest.TestCase):
             try:
                 self.rental.click(self.rental.deleteBtn_loc)
                 time.sleep(1)
-                self.rental.click(self.rental.deleteDialogOkBtn_loc)
+                try:
+                    self.rental.click(self.rental.deleteDialogOkBtn_loc)
+                except:
+                    self.driver.switch_to.default_content()
+                    self.rental.click(self.rental.deleteDialogOkBtn_loc)
+                    time.sleep(1)
+                    self.rental.switch_to_iframe(self.rental.iframe_loc)
             except:
                 break
-        # log.info('----搜索并删除已存在的记录----')
+            else:
+                log.info('------已执行删除操作，删除结果待验证！')
 
     def verify_add_and_edit(self, vendor):
         self.rental.search(vendor)
@@ -189,7 +199,7 @@ class ManageRentalsTest(unittest.TestCase):
         '''编辑租赁'''
         self.edit_rental(vendor)
         res = self.verify_add_and_edit(editVendor)
-        if res == True:
+        if res:
             log.info('-----编辑Rental成功！----')
         else:
             log.info('-----编辑Rental失败！----')
@@ -201,11 +211,12 @@ class ManageRentalsTest(unittest.TestCase):
         '''删除租赁'''
         self.search_and_delete(editVendor)
         res = self.verify_add_and_edit(editVendor)
-        if res == False:
+        if not res:
             log.info('-----删除Rental成功！----')
         else:
             log.info('-----删除Rental失败！----')
         self.assertFalse(res)
+
 
 if __name__ == '__main__':
     unittest.main()

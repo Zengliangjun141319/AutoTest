@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from Common.operater import  Operater
+from operater import  Operater
 
 class MaintenanceRecordPage(Operater):
 
@@ -35,7 +35,7 @@ class MaintenanceRecordPage(Operater):
     assetlist_loc = ('id', "machines_tbody") # 机器列表
     assetselect_loc = ('xpath', ".//*[@id='machines_tbody']/tr[6]")
     searchinput1_loc = ('id', "searchinputtxt") # 页面过滤条件输入框
-    searchbotton1_loc = ('xpath', ".//*[@id='content1']/div[1]/div[3]/input[2]")  # 页面查询按钮
+    searchbotton1_loc = ('xpath', './/*[@id="content1"]/div[1]/div[3]/input[@value="Search"]')  # 页面查询按钮
 
 
     # 新增按钮

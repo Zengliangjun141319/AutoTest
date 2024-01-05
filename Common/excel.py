@@ -59,9 +59,17 @@ class excel:
         except Exception as e:
             raise e
 
+    def get_rows(filename):
+        xlsdata = xlrd.open_workbook(filename)
+        table = xlsdata.sheet_by_name('Sheet1')
+        rows = table.nrows
+        return rows
+
 if __name__ == '__main__':
     root = None
-    files = u'./TestCase/API/loginData.xlsx'
-    datas = excel.get_list(files, 'Sheet1')
-    for line in datas:
-        print(line)
+    files = r'D:\SVN\IronIntel\Doc\AutoTest\report\Time+Line.xlsx'
+    # datas = excel.get_list(files, 'Sheet1')
+    # for line in datas:
+    #     print(line)
+    r = excel.get_rows(files)
+    print('Rows is : %s ' % r)

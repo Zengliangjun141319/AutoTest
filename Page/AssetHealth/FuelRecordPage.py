@@ -1,6 +1,8 @@
 # coding: utf-8
 
-from Common.operater import Operater
+from operater import Operater
+from Page.comms import *
+
 
 class FuelRecordPage(Operater):
 
@@ -18,7 +20,7 @@ class FuelRecordPage(Operater):
     enddate_loc = ('id', "enddatetxt") # 结束时间
     type_loc = ('id', "typeselectinput") # 机器类型
     searchinput_loc = ('id', "searchinputtxt") # 搜索输入框
-    searchbutton_loc = ('xpath', ".//*[@id='recordcontent']/div[2]/input[2]")  # 搜索按钮
+    searchbutton_loc = ('xpath', ".//*[@id='recordcontent']/div[2]/input[@value='Search']")  # 搜索按钮
 
     deletebutton_loc = ('xpath', ".//*[@id='recordlist']/div/div[1]/div/table/tbody/tr[1]/td/a[@title='Delete']")
     checkdelete_loc = ('xpath', 'html/body/div[@class="dialog popupmsg"]/div[@class="dialog-func"]/input[@value="Yes"]')
@@ -29,35 +31,35 @@ class FuelRecordPage(Operater):
     # 新增窗口元素
     iframefuel_loc = ('id', "iframfuelrecord")   # 新增窗口iframe
 
-    assetddicon_loc = ('xpath', ".//*[@id='dialog_machine']/div/div") # 机器下拉列表打开按钮
-    assetselect_loc = ('xpath', ".//*[@id='dropdowndiv']/ul/li[7]") # 机器列表第7台机器
-    transdate_loc = ('id', "dialog_transactiondate") # Transaction date时间控件
-    transtimehour_loc = ('id', "dialog_timehour") # Transaction time hour下拉选择框
-    transtimeminute_loc = ('id', "dialog_timeminute") # Transaction time minute下拉选择框
-    ticketnumber_loc = ('id', "dialog_ticketnumber") # Ticket number输入框
-    drivername_loc = ('id', "dialog_drivername") # Driver name输入框
-    fuelingasset_loc = ('id', "dialog_rdofuelingasset") # Fueling asset单选按钮
-    retailername_loc = ('id', "dialog_retailername") # retailer name输入框
-    retaileraddress_loc = ('id', "dialog_retaileraddress") # retailer address输入框
-    city_loc = ('id', "dialog_retailercity") # City输入框
-    stateddicon_loc = ('xpath', ".//*[@id='dialog_retailerstate']/div/div") # State下拉框列表打开按钮
-    stateselect_loc = ('xpath', ".//*[@id='dropdowndiv']/ul/li[2]") # State列表第二个选项
-    zip_loc = ('id', "dialog_retailerzip") # Zip输入框
-    odometer_loc = ('id', "dialog_odometer") # Odometer输入框
-    odometeruom_loc = ('id', "dialog_odometeruom") # Odometer 单位下拉选择框
-    fueltype_loc = ('id', "dialog_fueltype") # Fuel type下拉选择框
-    brandname_loc = ('id', "dialog_brandname") # Brand name输入框
-    measureunit_loc = ('xpath', ".//*[@id='dialog_unitofmeasure']/div/input") # Unit of measure输入框
+    assetddicon_loc = ('xpath', ".//*[@id='dialog_machine']/div/div")  # 机器下拉列表打开按钮
+    assetvin_loc = ('id', 'dialog_vin')  #
+    transdate_loc = ('id', "dialog_transactiondate")  # Transaction date时间控件
+    transtimehour_loc = ('id', "dialog_timehour")  # Transaction time hour下拉选择框
+    transtimeminute_loc = ('id', "dialog_timeminute")  # Transaction time minute下拉选择框
+    ticketnumber_loc = ('id', "dialog_ticketnumber")  # Ticket number输入框
+    drivername_loc = ('id', "dialog_drivername")  # Driver name输入框
+    fuelingasset_loc = ('id', "dialog_rdofuelingasset")  # Fueling asset单选按钮
+    retailername_loc = ('id', "dialog_retailername")  # retailer name输入框
+    retaileraddress_loc = ('id', "dialog_retaileraddress")  # retailer address输入框
+    city_loc = ('id', "dialog_retailercity")  # City输入框
+    stateddicon_loc = ('xpath', ".//*[@id='dialog_retailerstate']/div/div")  # State下拉框列表打开按钮
+    stateselect_loc = ('xpath', ".//*[@id='dropdowndiv']/ul/li[2]")  # State列表第二个选项
+    zip_loc = ('id', "dialog_retailerzip")  # Zip输入框
+    odometer_loc = ('id', "dialog_odometer")  # Odometer输入框
+    odometeruom_loc = ('id', "dialog_odometeruom")  # Odometer 单位下拉选择框
+    odouom_list = ('xpath', '//*[@id="dialog_odometeruom"]/div/div[2]/ul/li[1]')
+    fueltype_loc = ('xpath', '//*[@id="dialog_fueltype"]/div')  # Fuel type下拉选择框
+    brandname_loc = ('id', "dialog_brandname")  # Brand name输入框
+    measureunit_loc = ('xpath', ".//*[@id='dialog_unitofmeasure']/div/div/input")  # Unit of measure输入框
     measureunitselect_loc = ('xpath', ".//*[@id='dropdowndiv']/ul/li[1]")  # Unit of measure第一个选项
-    quantity_loc = ('id', "dialog_quantity") # Quantity输入框
-    unitcost_loc = ('id', "dialog_unitcost") # Unit cost输入框
-    totalcost_loc = ('id', "dialog_totalcost") # Total cost文本框
-    notes_loc = ('id', "dialog_notes") # Notes输入框
-    addfilebutton_loc = ('id', "uploadattfile") # Add File按钮
+    quantity_loc = ('id', "dialog_quantity")  # Quantity输入框
+    unitcost_loc = ('id', "dialog_unitcost")  # Unit cost输入框
+    totalcost_loc = ('id', "dialog_totalcost")  # Total cost文本框
+    notes_loc = ('id', "dialog_notes")  # Notes输入框
+    addfilebutton_loc = ('id', "uploadattfile")  # Add File按钮
 
     # 保存及提示信息
-    savebutton_loc = ('xpath', ".//*[@id='content1']/div[2]/div[1]/span[1]") # 保存按钮
-    exitwithoutsave_loc = ('xpath', ".//*[@id='content1']/div[2]/div[1]/span[5]") # 不保存退出按钮
-    alertmsg_loc = ('xpath', 'html/body/div[@class="dialog popupmsg"]/div[@class="dialog-content"]/div') # 提示信息
-    alertokbutton_loc = ('xpath', 'html/body/div[@class="dialog popupmsg"]/div[@class="dialog-func"]/input')
-
+    savebutton_loc = ('xpath', '//*[@id="content1"]/div[1]/div[@class="function_title"]/span[1]')  # 保存按钮
+    exitwithoutsave_loc = ('xpath', '//*[@id="content1"]/div[1]/div[@class="function_title"]/span[@class="sbutton iconexit"]')  # 不保存退出按钮
+    alertmsg_loc = ('xpath', msg_content)  # 提示信息
+    alertokbutton_loc = ('xpath', ok_btn)

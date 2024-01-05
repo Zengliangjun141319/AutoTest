@@ -7,16 +7,16 @@
 -------------------------------------------------
 """
 from Page.loginpage import LoginPage
-from Page.Inspection.ExportPackagesPage import ExportPackagesPage
-from Common.logger import Log
-from Common.operater import browser
+from Page.Inapection.ExportPackagesPage import ExportPackagesPage
+from logger import Log
+from operater import browser
 import pymssql
 import unittest
 import time
 import os
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from Common.skiptest import skip_dependon
+from skiptest import skip_dependon
 
 log = Log()
 path = '.\\report'
@@ -32,7 +32,7 @@ class ExportPackagesTest(unittest.TestCase):
     @classmethod
     def setUpClass(self) -> None:
         log.info('--------测试导出Inspection包--------')
-        self.driver = browser()
+        self.driver = browser("chromeH")
         self.login = LoginPage(self.driver)
         self.login.login('autotest@foresight.com','Win.12345')
         self.driver.implicitly_wait(60)
@@ -60,10 +60,12 @@ class ExportPackagesTest(unittest.TestCase):
         try:
             self.package.click(self.package.inspection_loc)
             time.sleep(2)
+            self.package.click(self.package.exButton_loc)
             self.package.click(self.package.exportPackages_loc)
         except:
             log.info('--------打开Export Packages菜单失败！--------')
         else:
+            self.package.click(self.package.exButton_loc)
             log.info('--------打开Export Packages菜单成功！--------')
 
     def create_package(self):
@@ -97,7 +99,7 @@ class ExportPackagesTest(unittest.TestCase):
     def save_package(self):
         try:
             self.package.click(self.package.saveBtn_loc)
-            time.sleep(1)
+            time.sleep(5)
             self.msg = self.package.get_text(self.package.saveMessage_loc)
             self.package.click(self.package.okBtn_loc)
         except:

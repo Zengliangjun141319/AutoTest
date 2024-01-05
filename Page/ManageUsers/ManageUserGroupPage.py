@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from Common.operater import Operater
+from operater import Operater
+
 
 class ManageUserGroupPage(Operater):
 

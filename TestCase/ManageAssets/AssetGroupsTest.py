@@ -7,13 +7,13 @@
 -------------------------------------------------
 """
 from Page.ManageAssets.AssetGroupsPage import AseetGroupsPage
-from Common.operater import browser
+from operater import browser
 from Page.loginpage import LoginPage
-from Common.logger import Log
+from logger import Log
 import unittest
 import os
 import time
-from Common.skiptest import skip_dependon
+from skiptest import skip_dependon
 
 log = Log()
 # 判断测试报告目录是否存在
@@ -25,16 +25,16 @@ current_time = time.strftime('%H%M%S', time.localtime(time.time()))
 groupName = 'AutoTest001'+current_time
 editGroupName = groupName+'Edit'
 
+
 class AssetGroypsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         #登录ironintel站点
-        log.info('------开始测试机器组管理------')
         cls.driver = browser()
         cls.login = LoginPage(cls.driver)
         cls.login.login('atassetgroup@iicon006.com','Win.12345')
         cls.driver.implicitly_wait(60)
-        log.info('------登录成功------')
+        log.info('------开始测试机器组管理------')
         cls.to_iframe(cls)
 
     @classmethod
@@ -47,16 +47,6 @@ class AssetGroypsTest(unittest.TestCase):
         time.sleep(3)
         self.assetGroup.switch_to_iframe(self.assetGroup.iframe_loc)
         time.sleep(1)
-        # try:
-        #     self.assetGroup.click(self.assetGroup.manageAssetLink_loc)
-        #     time.sleep(2)
-        #     self.assetGroup.click(self.assetGroup.assetGroup_loc)
-        # except:
-        #     log.info('--------打开Asset Groups列表失败！--------')
-        # else:
-        #     log.info('--------打开Asset Groups列表成功！--------')
-        #     self.assetGroup.switch_to_iframe(self.assetGroup.iframe_loc)
-        #     time.sleep(1)
 
     def input_group_information(self):
         try:
@@ -100,7 +90,6 @@ class AssetGroypsTest(unittest.TestCase):
             self.assetGroup.inputTo(self.assetGroup.description_loc, 'AutoTestEdit')
             time.sleep(1)
 
-
     def search_and_delete(self, assetGroup):
         '''搜索并删除已存在的记录'''
         self.assetGroup.search(assetGroup)
@@ -114,7 +103,12 @@ class AssetGroypsTest(unittest.TestCase):
             self.assetGroup.js_execute("window.scrollTo(0,300)")
             for i in range(trNum):
                 self.assetGroup.click(self.assetGroup.deleteBtn_loc)
-                self.assetGroup.click(self.assetGroup.deleteDialogOkBtn_loc)
+                try:
+                    self.assetGroup.click(self.assetGroup.deleteDialogOkBtn_loc)
+                except:
+                    self.driver.switch_to.default_content()
+                    self.assetGroup.click(self.assetGroup.deleteDialogOkBtn_loc)
+                    self.assetGroup.switch_to_iframe(self.assetGroup.iframe_loc)
             log.info('----删除已存在的记录!----')
 
     def search_and_verify(self, groupName):
@@ -170,6 +164,7 @@ class AssetGroypsTest(unittest.TestCase):
         else:
             log.info('-----删除机器组失败！----')
         self.assertFalse(res)
+
 
 if __name__ == '__main__':
     unittest.main()

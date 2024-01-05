@@ -1,13 +1,13 @@
 # coding:utf-8
 
 from Page.SystemSettings.ManageDepartment import DepartmentPage
-from Common.operater import browser
+from operater import browser
 from Page.loginpage import LoginPage
-from Common.logger import Log
+from logger import Log
 import unittest
 import os
 import time
-from Common.skiptest import skip_dependon
+from skiptest import skip_dependon
 
 log = Log()
 path = '.\\report'
@@ -21,11 +21,11 @@ dep_code = 'code'+current_time
 edit_name = 'editdepartment' + current_time
 childdep_name = 'childdepartment' + current_time
 
-class DepartmentTest(unittest.TestCase):
 
+class DepartmentTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.driver = browser()
+        cls.driver = browser("chromeH")
         cls.login = LoginPage(cls.driver)
         cls.login.login("atdepartment@iicon001.com", "Win.12345")
         cls.driver.implicitly_wait(60)
@@ -45,7 +45,13 @@ class DepartmentTest(unittest.TestCase):
             self.department.click(self.department.syssettings_loc)
             self.driver.implicitly_wait(60)
             time.sleep(5)
+            arr_status = self.driver.find_element_by_xpath('//*[@id="nav_arrow"]/div').get_attribute('class')
+            if arr_status == 'icn collapse':
+                self.department.click(self.department.exButton_loc)
+                time.sleep(1)
             self.department.click(self.department.department_loc)
+            self.department.click(self.department.exButton_loc)
+            time.sleep(1)
         except:
             log.info("-----打开Manage Departments页面失败-----")
         else:
@@ -97,7 +103,6 @@ class DepartmentTest(unittest.TestCase):
             time.sleep(3)
             log.info("-----编辑Department完成，结果待验证-----")
 
-
     def search_departments(self, comparename):
         time.sleep(2)
         self.driver.find_element_by_xpath('//*[@id="recordcontent"]/div[2]/span[2]').click()
@@ -115,24 +120,20 @@ class DepartmentTest(unittest.TestCase):
             return False
 
     def delete_department(self):
-        del_beforename = self.department.get_text(self.department.firstdepartname_loc)
         try:
             self.department.click(self.department.delbutton_loc)
             time.sleep(1)
-            self.department.click(self.department.delmsgok_loc)
+            try:
+                self.department.click(self.department.delmsgok_loc)
+            except:
+                self.driver.switch_to.default_content()
+                self.department.click(self.department.delmsgok_loc)
+                self.department.switch_to_iframe(self.department.iframe_loc)
         except:
             log.info("-----删除Department失败-----")
         else:
             log.info("-----删除Department完成，结果待验证-----")
         time.sleep(2)
-        # del_aftername = self.department.get_text(self.department.firstdepartname_loc)
-        #
-        # if del_beforename == del_aftername:
-        #     return False
-        # else:
-        #     return True
-
-
 
     def test01_verify_addsucess(self):
         self.add_department()

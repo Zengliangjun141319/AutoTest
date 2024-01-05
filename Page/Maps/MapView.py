@@ -1,5 +1,6 @@
 from operater import Operater
-from time import sleep
+from Page.comms import *
+
 
 class MapView(Operater):
     # 左侧菜单
@@ -24,10 +25,22 @@ class MapView(Operater):
     saveSeachDefault_loc = ('id', 'btnSaveSearchDetault')
     searchInbox_loc = ('id', 'txtMachineSearchText')  # 搜索框
     searchButton_loc = ('id', 'btnMachineSearch')  # 搜索按钮
-    showAll_loc = ('xpath', '//*[@id="machineHeader"]/input[3]')
+    showAll_loc = ('xpath', '//*[@id="machineHeader"]/input[@value="Show All"]')  #  //*[@id="machineHeader"]/input[4]
 
     chxcloude0_loc = ('id', 'chkExcludeNoLoc')  # 包含0，0
     selAttachment_loc = ('id', 'selAttachment')    # 下拉选择Attachment
+
+    # TimeLine按钮及页面元素
+    timeLineBtn_loc = ('id', 'btnToggleTimeline')  # Timeline按钮
+
+    timeLineFrame = ('xpath', '//*[@id="iftimelineview"]')
+    timeSelect_loc = ('id', 'date-selector')
+    timeRefreshBtn_loc = ('xpath', '//*[@id="content1"]/div[3]/span[@class="sbutton iconrefresh"]')
+    timeDatas_loc = ('id', 'asset-ids')
+
+    utilizationTab = ('xpath', '//*[@id="tab_container"]/ul/li[@data-href="tab_grid"]')
+    timeLineExport_loc = ('id', 'btnexporttimelineexcel')
+    timelineCloseBtn = ('xpath', '//*[@id="content1"]/div[1]/span[@class="iconclose titleButton close"]')
 
     # 机器列表
     firstAssetCheck_loc = ('xpath', '//*[@id="machineList"]/div/div[1]/input')
@@ -51,6 +64,13 @@ class MapView(Operater):
     TripReport_loc = ('id', 'btnLoadTrip')
     closeTrip_loc = ('id', 'btnClearTrip')
     TripReports_loc = ('xpath', '//*[@id="tbTrips"]/tr')
+
+    # Theft Mode
+    theft_mode_btn = ('id', 'btnTheftMode')
+    theft_mode_load_btn = ('id', 'btnTheftModeReload')
+    theft_sec_source_name = ('xpath', '//*[@id="containerTheft"]/div/label/span[text()="Calamp - Pedi"]')
+    theft_sec_checkbox_loc = ('xpath', '//*[@id="containerTheft"]/div/label/span[text()="Calamp - Pedi"]/preceding-sibling::input')
+    theft_mode_close_btn = ('id', 'btnClearTheft')
 
     # Jobsite列表
     selectAllCheck_loc = ('id', 'chkSelectAll')
@@ -89,8 +109,8 @@ class MapView(Operater):
     jobsitesendothertext_loc = ('id', 'sendlocation_othertextaddress')
     jobsitesendDesc_loc = ('id', 'sendlocation_desc')
     jobsitesendOK_loc = ('xpath', '//*[@id="dialog_sendlocation"]/div[3]/input[2]')
-    sendjobsitetxt_loc = ('xpath', '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-content"]/div')
-    sendjobsiteOK_loc = ('xpath', '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-func"]/input')
+    sendjobsitetxt_loc = ('xpath', msg_content)
+    sendjobsiteOK_loc = ('xpath', ok_btn)
 
     # 编辑Jobsite
     jobsiteFrame = ('id', 'iframejobsite')
@@ -105,19 +125,19 @@ class MapView(Operater):
     jobsitename_loc = ('id', 'dialog_jobsitename')  # Jobsite名称
     jobsitecode_loc = ('id', 'dialog_jobsitecode')
 
-    editjobsitetxt_loc = ('xpath', '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-content"]/div')  # /html/body/div[6]/div[2]/div
-    editjobsiteOK_loc = ('xpath', '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-func"]/input')  # /html/body/div[7]/div[3]/input
+    editjobsitetxt_loc = ('xpath', msg_content)  # /html/body/div[6]/div[2]/div
+    editjobsiteOK_loc = ('xpath', ok_btn)  # /html/body/div[7]/div[3]/input
 
     # 编辑机器
     AssetFrame = ('id', 'iframemachine')
 
-    AssetSave_loc = ('xpath', '//*[@id="div_content"]/div[2]/span[1]')
-    AssetSaveandexit_loc = ('xpath', '//*[@id="div_content"]/div[2]/span[2]')
-    AssetExit_loc = ('xpath', '//*[@id="div_content"]/div[2]/span[3]')
+    AssetSave_loc = ('xpath', '//*[@id="div_content"]/div[@class="function_title"]/span[1]')
+    AssetSaveandexit_loc = ('xpath', '//*[@id="div_content"]/div[@class="function_title"]/span[2]')
+    AssetExit_loc = ('xpath', '//*[@id="div_content"]/div[@class="function_title"]/span[3]')
 
     AssetCustomName_loc = ('id', 'dialog_name2')  # Custom Asset Name
-    SaveAssetTxt_loc = ('xpath', '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-content"]/div')
-    SaveAssetOK_loc = ('xpath', '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-func"]/input')  # /html/body/div[20]/div[3]/input
+    SaveAssetTxt_loc = ('xpath', msg_content)
+    SaveAssetOK_loc = ('xpath', ok_btn)  # /html/body/div[20]/div[3]/input
 
     # Details
     AssetDetailFrame = ('id', 'ifassetview')
@@ -161,5 +181,5 @@ class MapView(Operater):
 
     SROKButton_loc = ('xpath', '//*[@id="dialog_sendlocation"]/div[@class="dialog-func"]/input[2]')
 
-    SRMessage_loc = ('xpath', '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-content"]/div')
-    SRMessageOk_loc = ('xpath', '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-func"]/input')
+    SRMessage_loc = ('xpath', msg_content)
+    SRMessageOk_loc = ('xpath', ok_btn)

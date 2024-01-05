@@ -1,12 +1,15 @@
 # coding: utf-8
 
-from Common.operater import Operater
+from operater import Operater
+from Page.comms import *
+
 
 class DepartmentPage(Operater):
-
+    # Department
     settingsbutton_loc = ('id', "button_menu")
     syssettings_loc = ('xpath', "//*[@id='lisyssetting']/a/span")
     department_loc = ('xpath', "//*[@id='nav_departments']/a/span")
+    exButton_loc = ('id', 'nav_arrow')
 
     iframe_loc = ('xpath', "//*[@id='set_right']/iframe")
 
@@ -18,8 +21,8 @@ class DepartmentPage(Operater):
     okbutton_loc = ('xpath', '//*[@id="dialog_department"]/div[3]/input[2]')
     cancelbutton_loc = ('xpath', '//*[@id="dialog_department"]/div[3]/input[1]')
 
-    addmsg_loc = ('xpath', '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-content"]/div')
-    msgokbutton_loc = ('xpath', '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-func"]/input')
+    addmsg_loc = ('xpath', msg_content)
+    msgokbutton_loc = ('xpath', ok_btn)
 
     addchild_loc = ('xpath', '//*[@id="departmentlist"]/div/div/div/table/tr[1]/td/a[@title="Add"]')
     editbutton_loc = ('xpath', '//*[@id="departmentlist"]/div/div/div/table/tr/td/a[@title="Edit"]')
@@ -27,6 +30,6 @@ class DepartmentPage(Operater):
 
     delbutton_loc = ('xpath', '//*[@id="departmentlist"]/div/div/div/table/tr/td/a[@title="Delete"]')
 
-    delmsgok_loc = ('xpath', '/html/body/div[@class="dialog popupmsg"]/div[@class="dialog-func"]/input[2]')
+    delmsgok_loc = ('xpath', yes_btn)
 
     firstdepartname_loc = ('xpath', "//*[@id='departmentlist']/div/div/div/table/tr[1]/td[1]/span")
